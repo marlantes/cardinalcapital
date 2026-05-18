@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cardinal Capital</title>
+<meta name="description" content="Cardinal Capital" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --cream:    #F4EFE6;
+    --navy:     #0E2A47;
+    --cardinal: #A4243B;
+    --brass:    #B08544;
+    --slate:    #6B7480;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--cream);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+  }
+
+  .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transform: translateY(-2vh); /* optical centering */
+  }
+
+  .wordmark {
+    font-family: 'Fraunces', 'Cambria', 'Georgia', serif;
+    font-weight: 300;
+    font-variation-settings: 'opsz' 144;
+    font-size: clamp(3rem, 10vw, 8rem);
+    letter-spacing: -0.015em;
+    color: var(--navy);
+    line-height: 0.95;
+    transition: opacity 0.4s ease;
+    user-select: none;
+  }
+
+  .wordmark em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--cardinal);
+  }
+
+  /* hover anchor — a small dot that reveals the contact */
+  .reveal {
+    margin-top: 2.4rem;
+    position: relative;
+    height: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--brass);
+    opacity: 0.6;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .contact {
+    position: absolute;
+    top: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.82rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--slate);
+    opacity: 0;
+    transition: opacity 0.35s ease 0.05s;
+    pointer-events: none;
+  }
+
+  .contact a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 0.5px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .contact a:hover {
+    color: var(--cardinal);
+    border-bottom-color: var(--cardinal);
+  }
+
+  /* Reveal contact on hover/focus of the stage */
+  .stage:hover .dot,
+  .stage:focus-within .dot {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  .stage:hover .contact,
+  .stage:focus-within .contact {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Touch devices: tap-to-reveal via :focus on the trigger */
+  .trigger {
+    position: absolute;
+    inset: -16px -40px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Subtle entrance */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .wordmark { animation: rise 0.9s ease-out both; }
+
+  /* Soft paper grain */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(rgba(14,42,71,0.022) 1px, transparent 1px);
+    background-size: 3px 3px;
+    z-index: 1;
+  }
+
+  .stage { position: relative; z-index: 2; }
+</style>
+</head>
+<body>
+  <div class="stage" tabindex="0">
+    <h1 class="wordmark">Cardinal<br>Capital</h1>
+
+    <div class="reveal">
+      <span class="dot" aria-hidden="true"></span>
+      <span class="contact">
+        <a href="mailto:alex@cardinalcapital.xyz">alex@cardinalcapital.xyz</a>
+      </span>
+      <button class="trigger" aria-label="Reveal contact"></button>
+    </div>
+  </div>
+
+  <script>
+    // Touch: tapping the trigger toggles a 'revealed' class for sticky reveal
+    document.querySelector('.trigger').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelector('.stage').focus();
+    });
+  </script>
+</body>
+</html>
