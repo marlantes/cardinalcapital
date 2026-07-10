@@ -42,7 +42,7 @@
     cursor: default;
   }
 
-  /* soft vignette — light falls toward the center */
+  /* midnight vignette — a faint warm glow behind the lockup */
   body::before {
     content: '';
     position: fixed; inset: 0;
@@ -53,7 +53,7 @@
     z-index: 1;
   }
 
-  /* paper grain */
+  /* star-chart grain */
   body::after {
     content: '';
     position: fixed; inset: 0;
@@ -98,7 +98,7 @@
     width: clamp(64px, 11vw, 108px);
     height: 1px;
     background: linear-gradient(to right, transparent, var(--brass));
-    opacity: 0.65;
+    opacity: 0.6;
   }
 
   .rule .line:last-child {
@@ -204,10 +204,136 @@
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--slate);
-    opacity: 0.55;
+    opacity: 0.5;
     z-index: 2;
     animation: rise 1s ease-out 0.6s both;
   }
+
+  /* ---- the hatch & the engine room ---- */
+  .mark { cursor: pointer; }
+  .wordmark, .contact { transition: transform 0.95s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.6s ease; }
+  .rule { transition: opacity 0.45s ease 0.15s; }
+  .rule .line { transition: width 0.55s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s ease; }
+  .foot { transition: opacity 0.5s ease; }
+
+  body.hatch-arming .rule .line { width: 0; opacity: 0; }
+  body.hatch-open .wordmark { animation: none; transform: translateY(-64vh); opacity: 0; }
+  body.hatch-open .contact  { animation: none; transform: translateY(64vh); opacity: 0; }
+  body.hatch-open .rule     { opacity: 0; }
+  body.hatch-open .foot     { animation: none; opacity: 0; }
+
+  .foot a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(176,133,68,0.3);
+    padding-bottom: 1px;
+    transition: color 0.25s ease, border-color 0.25s ease;
+  }
+  .foot a:hover { color: var(--brass); border-bottom-color: var(--brass); }
+
+  #terminal {
+    position: fixed; inset: 0; z-index: 4;
+    background: #04090F;
+    display: none; opacity: 0;
+    transition: opacity 0.45s ease;
+  }
+  #terminal.on  { display: block; }
+  #terminal.lit { opacity: 1; }
+  #terminal::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg,
+      rgba(244,239,230,0.02) 0, rgba(244,239,230,0.02) 1px,
+      transparent 1px, transparent 3px);
+  }
+  #term-scroll {
+    position: absolute; inset: 0; overflow-y: auto;
+    padding: clamp(28px, 7vh, 72px) clamp(20px, 8vw, 110px);
+  }
+  #term-out, #term-line {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 13.5px; line-height: 1.85;
+    color: var(--cream);
+    white-space: pre-wrap; word-break: break-word; text-align: left;
+  }
+  .t-brass { color: var(--brass); }
+  .t-red   { color: var(--cardinal); }
+  .t-dim   { color: var(--slate); }
+  .t-cmd { color: var(--brass); cursor: pointer; border-bottom: 1px dotted rgba(214,168,92,0.45); }
+  .t-cmd:hover { color: var(--cream); }
+  .cursor { display: inline-block; width: 0.6em; background: var(--brass); animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  #term-in { position: fixed; opacity: 0; left: -9999px; top: 0; }
+
+  /* ---- the present ---- */
+  #gift {
+    position: fixed; inset: 0; z-index: 6;
+    display: none; opacity: 0;
+    transition: opacity 0.45s ease;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 45%, rgba(214,168,92,0.06), transparent 60%),
+      rgba(3, 7, 12, 0.96);
+    cursor: pointer;
+  }
+  #gift.on  { display: flex; align-items: center; justify-content: center; }
+  #gift.lit { opacity: 1; }
+
+  #gift-stage { position: relative; display: flex; flex-direction: column; align-items: center; }
+
+  #gift-box {
+    width: clamp(150px, 24vw, 220px);
+    overflow: visible;
+    transform: scale(0);
+    transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  #gift.lit #gift-box { transform: scale(1); }
+  #gift.shake #gift-box { animation: gift-shake 0.5s ease-in-out 2; }
+
+  @keyframes gift-shake {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1) rotate(-3deg) translateX(-4px); }
+    75% { transform: scale(1) rotate(3deg) translateX(4px); }
+  }
+
+  #glid {
+    transition: transform 0.8s cubic-bezier(0.3, 1.4, 0.5, 1), opacity 0.5s ease 0.55s;
+  }
+  #gift.pop #glid { transform: translate(26px, -105px) rotate(-30deg); opacity: 0; }
+
+  #gift-bird {
+    position: absolute;
+    left: 50%; top: 30%;
+    width: clamp(72px, 11vw, 104px);
+    height: auto;
+    margin-left: calc(clamp(72px, 11vw, 104px) / -2);
+    opacity: 0;
+    overflow: visible;
+    pointer-events: none;
+  }
+  #gift.pop #gift-bird { animation: bird-pop 1.4s cubic-bezier(0.34, 1.35, 0.5, 1) 0.12s forwards; }
+  #gift-bird .body { fill: var(--cardinal); }
+  #gift-bird .wing {
+    fill: #8E1F35;
+    transform-origin: 14px 12px;
+    animation: flap 0.2s ease-in-out infinite alternate;
+  }
+
+  @keyframes bird-pop {
+    0%   { opacity: 0; transform: translateY(90px) scale(0.25) rotate(8deg); }
+    30%  { opacity: 1; }
+    70%  { transform: translateY(-130px) scale(1.04) rotate(-4deg); }
+    100% { opacity: 1; transform: translateY(-118px) scale(1) rotate(0deg); }
+  }
+
+  #gift-msg {
+    margin-top: 2.2rem;
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 13px; line-height: 1.9;
+    color: var(--cream);
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  #gift.msg #gift-msg { opacity: 1; }
 
   @keyframes rise {
     from { opacity: 0; transform: translateY(10px); }
@@ -234,7 +360,7 @@
         <line class="tick" x1="63" y1="32" x2="57" y2="32" />
         <line class="tick" x1="32" y1="63" x2="32" y2="57" />
         <line class="tick" x1="1"  y1="32" x2="7"  y2="32" />
-        <!-- needle: cardinal-red north tip, navy tail; rotates to your cursor -->
+        <!-- needle: cardinal-red north tip, cream tail; rotates to your cursor -->
         <g id="needle">
           <path class="n-lit" d="M32 8 L32 34 L27.8 29.8 Z" />
           <path class="n-dim" d="M32 8 L36.2 29.8 L32 34 Z" />
@@ -254,7 +380,7 @@
     </p>
   </main>
 
-  <footer class="foot">© MMXXVI · Cardinal · Cardinal Capital · Cardinal Technologies</footer>
+  <footer class="foot">© MMXXVI · Cardinal · Cardinal Capital · Cardinal Technologies · <a id="careers-link" href="#careers">careers</a></footer>
 
   <!-- the cardinal -->
   <svg id="bird" viewBox="0 0 36 28" aria-hidden="true">
@@ -262,16 +388,55 @@
     <path class="wing" d="M14.5 13 C18.5 10 23 10.2 25.6 12.6 C23.4 16.2 18 17.2 13.2 15.2 Z" />
   </svg>
 
+  <!-- the engine room -->
+  <div id="terminal" role="dialog" aria-label="Cardinal careers terminal">
+    <div id="term-scroll">
+      <div id="term-out"></div>
+      <div id="term-line"></div>
+    </div>
+    <input id="term-in" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="terminal input" />
+  </div>
+
+  <!-- the present -->
+  <div id="gift" aria-hidden="true">
+    <div id="gift-stage">
+      <svg id="gift-bird" viewBox="0 0 36 28" aria-hidden="true">
+        <path class="body" d="M2 10 L12 12.2 C13 9.4 15.4 7.6 18.4 7.2 L19.2 6.8 L21.2 1.6 L23.2 6.6 C25.8 7 28 8.6 29 11 L35 12.6 L29.2 14 C28.4 17.8 25 20.2 20.6 20.4 C16.8 20.6 13.4 19.4 11.6 17 L2 16 L5.4 13 Z" />
+        <path class="wing" d="M14.5 13 C18.5 10 23 10.2 25.6 12.6 C23.4 16.2 18 17.2 13.2 15.2 Z" />
+      </svg>
+      <svg id="gift-box" viewBox="0 0 120 130" aria-hidden="true">
+        <rect x="20" y="60" width="80" height="52" rx="3" fill="#A4243B" />
+        <rect x="54" y="60" width="12" height="52" fill="#D6A85C" />
+        <g id="glid">
+          <rect x="14" y="46" width="92" height="17" rx="3" fill="#C8324D" />
+          <rect x="54" y="46" width="12" height="17" fill="#D6A85C" />
+          <path d="M60 46 C52 34 40 34 42 41 C43 46 52 46 60 46 Z" fill="none" stroke="#D6A85C" stroke-width="3.5" />
+          <path d="M60 46 C68 34 80 34 78 41 C77 46 68 46 60 46 Z" fill="none" stroke="#D6A85C" stroke-width="3.5" />
+        </g>
+      </svg>
+      <div id="gift-msg">
+        <div class="t-brass">NORTHSTAR — correct.</div>
+        <div>nine numbers, nine capitals, one word.</div>
+        <div>&nbsp;</div>
+        <div>skip the queue &rarr; contact@cardinalcapital.xyz</div>
+        <div>subject: northstar</div>
+        <div class="t-dim">(click anywhere to return)</div>
+      </div>
+    </div>
+  </div>
+
   <script>
     (() => {
       const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const fine = matchMedia('(pointer: fine)').matches;
 
-      /* ---- compass needle follows the cursor, springs back to north ---- */
+      /* ---- compass needle: cursor-tracking spring + calibration spin ---- */
       const needle = document.getElementById('needle');
       const mark = document.querySelector('.mark');
-      if (!reduced && matchMedia('(pointer: fine)').matches) {
-        let target = 0, angle = 0, vel = 0, lastMove = -1e9;
+      let target = 0, angle = 0, vel = 0, lastMove = -1e9, spinning = false;
+      const setNeedle = () => needle.setAttribute('transform', `rotate(${angle.toFixed(2)} 32 32)`);
 
+      if (!reduced && fine) {
         addEventListener('pointermove', (e) => {
           const r = mark.getBoundingClientRect();
           const dx = e.clientX - (r.left + r.width / 2);
@@ -280,17 +445,40 @@
           target = Math.atan2(dx, -dy) * 180 / Math.PI;
           lastMove = performance.now();
         });
-
         document.documentElement.addEventListener('mouseleave', () => { lastMove = -1e9; });
+      }
 
+      if (!reduced) {
         (function tick(now) {
-          if (now - lastMove > 2500) target = 0; // drawn back to true north
-          let diff = ((target - angle + 540) % 360) - 180;
-          vel = vel * 0.95 + diff * 0.002; // gentle magnetic spring, heavy damping
-          angle += vel;
-          needle.setAttribute('transform', `rotate(${angle.toFixed(2)} 32 32)`);
+          if (!spinning) {
+            if (now - lastMove > 2500) target = 0; // drawn back to true north
+            const diff = ((target - angle + 540) % 360) - 180;
+            vel = vel * 0.95 + diff * 0.002; // gentle magnetic spring, heavy damping
+            angle += vel;
+            setNeedle();
+          }
           requestAnimationFrame(tick);
         })(0);
+      }
+
+      function spinNeedle(done) {
+        if (reduced) { done && done(); return; }
+        spinning = true;
+        const from = angle, to = from + 810;
+        const t0 = performance.now(), dur = 1650;
+        (function sp(now) {
+          const t = Math.min((now - t0) / dur, 1);
+          const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          angle = from + (to - from) * e;
+          setNeedle();
+          if (t < 1) requestAnimationFrame(sp);
+          else {
+            angle = ((angle % 360) + 360) % 360;
+            if (angle > 180) angle -= 360;
+            vel = 0; spinning = false;
+            done && done();
+          }
+        })(t0);
       }
 
       /* ---- the cardinal takes a random flight on hovering "contact" ---- */
@@ -314,7 +502,6 @@
 
         const W = innerWidth, H = innerHeight;
         const r = contact.getBoundingClientRect();
-        // random swoop: launch from "contact", wander, exit a random side
         const pts = [[r.left + r.width / 2, r.top - 6]];
         const n = 3 + Math.floor(Math.random() * 3);
         for (let i = 0; i < n; i++)
@@ -341,6 +528,364 @@
 
       contact.addEventListener('mouseenter', fly);
       contact.addEventListener('focus', fly);
+
+      /* ---- the hatch: click the compass (or "careers") to open the engine room ---- */
+      const term = document.getElementById('terminal');
+      const scroller = document.getElementById('term-scroll');
+      const out = document.getElementById('term-out');
+      const lineEl = document.getElementById('term-line');
+      const inp = document.getElementById('term-in');
+      const PROMPT = 'cardinal@true-north:~$ ';
+      let open = false, booted = false, unlocked = false, giftOpen = false;
+
+      /* approximate position from the browser's timezone — nothing leaves the page */
+      const TZ_COORDS = {
+        'America/New_York': [40.7, -74.0], 'America/Chicago': [41.9, -87.6],
+        'America/Denver': [39.7, -105.0], 'America/Phoenix': [33.4, -112.1],
+        'America/Los_Angeles': [34.1, -118.2], 'America/Anchorage': [61.2, -149.9],
+        'Pacific/Honolulu': [21.3, -157.9], 'America/Detroit': [42.3, -83.0],
+        'America/Toronto': [43.7, -79.4], 'America/Vancouver': [49.3, -123.1],
+        'America/Edmonton': [53.5, -113.5], 'America/Winnipeg': [49.9, -97.1],
+        'America/Halifax': [44.6, -63.6], 'America/Mexico_City': [19.4, -99.1],
+        'America/Guatemala': [14.6, -90.5], 'America/Costa_Rica': [9.9, -84.1],
+        'America/Panama': [9.0, -79.5], 'America/Bogota': [4.7, -74.1],
+        'America/Lima': [-12.0, -77.0], 'America/Caracas': [10.5, -66.9],
+        'America/Santiago': [-33.4, -70.7], 'America/Sao_Paulo': [-23.6, -46.6],
+        'America/Argentina/Buenos_Aires': [-34.6, -58.4],
+        'Atlantic/Reykjavik': [64.1, -21.9],
+        'Europe/London': [51.5, -0.1], 'Europe/Dublin': [53.3, -6.3],
+        'Europe/Lisbon': [38.7, -9.1], 'Europe/Madrid': [40.4, -3.7],
+        'Europe/Paris': [48.9, 2.3], 'Europe/Brussels': [50.8, 4.4],
+        'Europe/Amsterdam': [52.4, 4.9], 'Europe/Zurich': [47.4, 8.5],
+        'Europe/Berlin': [52.5, 13.4], 'Europe/Rome': [41.9, 12.5],
+        'Europe/Vienna': [48.2, 16.4], 'Europe/Prague': [50.1, 14.4],
+        'Europe/Copenhagen': [55.7, 12.6], 'Europe/Oslo': [59.9, 10.8],
+        'Europe/Stockholm': [59.3, 18.1], 'Europe/Helsinki': [60.2, 24.9],
+        'Europe/Warsaw': [52.2, 21.0], 'Europe/Budapest': [47.5, 19.0],
+        'Europe/Bucharest': [44.4, 26.1], 'Europe/Kyiv': [50.5, 30.5],
+        'Europe/Athens': [38.0, 23.7], 'Europe/Istanbul': [41.0, 29.0],
+        'Europe/Moscow': [55.8, 37.6], 'Africa/Casablanca': [33.6, -7.6],
+        'Africa/Lagos': [6.5, 3.4], 'Africa/Cairo': [30.0, 31.2],
+        'Africa/Nairobi': [-1.3, 36.8], 'Africa/Johannesburg': [-26.2, 28.0],
+        'Asia/Jerusalem': [31.8, 35.2], 'Asia/Riyadh': [24.7, 46.7],
+        'Asia/Dubai': [25.2, 55.3], 'Asia/Karachi': [24.9, 67.0],
+        'Asia/Kolkata': [22.6, 88.4], 'Asia/Dhaka': [23.8, 90.4],
+        'Asia/Bangkok': [13.8, 100.5], 'Asia/Jakarta': [-6.2, 106.8],
+        'Asia/Singapore': [1.4, 103.8], 'Asia/Manila': [14.6, 121.0],
+        'Asia/Hong_Kong': [22.3, 114.2], 'Asia/Taipei': [25.0, 121.5],
+        'Asia/Shanghai': [31.2, 121.5], 'Asia/Seoul': [37.6, 127.0],
+        'Asia/Tokyo': [35.7, 139.7], 'Australia/Perth': [-31.9, 115.9],
+        'Australia/Brisbane': [-27.5, 153.0], 'Australia/Melbourne': [-37.8, 145.0],
+        'Australia/Sydney': [-33.9, 151.2], 'Pacific/Auckland': [-36.8, 174.8],
+      };
+      const fmtCoord = (v, pos, neg) => Math.abs(v).toFixed(1) + '\u00B0' + (v >= 0 ? pos : neg);
+      const hist = []; let hIdx = 0;
+
+      const escHtml = (x) => x.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+      const link = (c) => `<span class="t-cmd" data-cmd="${c}">[${c}]</span>`;
+
+      function print(html) {
+        const d = document.createElement('div');
+        d.innerHTML = html || '&nbsp;';
+        out.appendChild(d);
+        scroller.scrollTop = scroller.scrollHeight;
+      }
+
+      function renderLine() {
+        lineEl.innerHTML =
+          `<span class="t-brass">${escHtml(PROMPT)}</span>${escHtml(inp.value)}<span class="cursor">&nbsp;</span>`;
+        scroller.scrollTop = scroller.scrollHeight;
+      }
+
+      const MISSION =
+`We are technologists who invest.
+
+We spend our time building tools that give people
+superpowers. Our focus is on being the best possible
+growth partner for businesses that will need more,
+not less, people in the future.`;
+
+      const ROLES =
+`OPEN POSITIONS — 2
+
+[1] APPLIED AI ENGINEERING
+    You build agent systems that do real work — not demos.
+    You ship into businesses we own, and the P&L tells you
+    the truth about what you built.
+
+[2] FORWARD DEPLOYED BUSINESS UNIT MANAGER
+    You embed inside a company we acquire and run the
+    transformation from the inside. Part operator, part
+    translator. You own a unit's numbers while its
+    workflows are rebuilt around you.
+
+HOW TO APPLY — proof of work, not a resume.
+    engineers:  the thing you're proudest of building
+                with an LLM — and what it got wrong.
+    operators:  a one-pager on a process you killed.`;
+
+      const STREAM =
+`\u2500\u2500 stream.txt \u2500\u2500
+
+ 1   37.9838 N    23.7275 E
+ 2    1.2921 S    36.8219 E
+ 3   35.6762 N   139.6503 E
+ 4   59.9139 N    10.7522 E
+ 5   60.1699 N    24.9384 E
+ 6   41.9028 N    12.4964 E
+ 7   59.3293 N    18.0686 E
+ 8   30.0444 N    31.2357 E
+ 9   64.1466 N    21.9426 W
+10   40.4168 N     3.7038 W
+11   41.2865 S   174.7762 E
+12   48.8566 N     2.3522 E`;
+
+      const SEQUENCE =
+`\u2500\u2500 sequence.txt \u2500\u2500
+
+2 4 6 3 5 7 3 1 9
+
+unlock <word>`;
+
+      const NORTHSTAR_TXT =
+`you followed nine numbers through nine capitals.
+that is precisely the energy we hire for.
+
+skip the queue:
+  contact@cardinalcapital.xyz
+  subject: northstar
+
+we read these first.`;
+
+      const BIRD_TXT =
+`      /\\
+     ( o>     the cardinal.
+     /) )     quick hands, quicker eyes.
+      " "     it only flies for the curious.`;
+
+      function exec(raw) {
+        const cmd = raw.trim();
+        if (!cmd) return;
+        print(`<span class="t-brass">${escHtml(PROMPT)}</span>${escHtml(cmd)}`);
+        hist.push(cmd); hIdx = hist.length;
+        const parts = cmd.toLowerCase().split(/\s+/);
+        const c = parts[0], arg = parts[1] || '';
+
+        if (c === 'help') {
+          print(`<span class="t-dim">  mission     what we believe
+  roles       open positions (2)
+  apply       open a mail draft
+  whoami      identify yourself
+  puzzle
+  exit        seal the hatch (esc works too)</span>`);
+        } else if (c === 'mission' || (c === 'cat' && arg === 'mission.txt')) {
+          print(escHtml(MISSION));
+        } else if (c === 'roles' || (c === 'cat' && arg === 'roles.txt')) {
+          print(escHtml(ROLES));
+          print(`type ${link('apply')} to open a draft.`);
+        } else if (c === 'apply') {
+          print(`opening a draft → <span class="t-brass">contact@cardinalcapital.xyz</span>  ·  subject: "found the engine room"`);
+          print(`<span class="t-dim">proof of work, not a resume.</span>`);
+          setTimeout(() => {
+            location.href = 'mailto:contact@cardinalcapital.xyz?subject=' +
+              encodeURIComponent('found the engine room');
+          }, 400);
+        } else if (c === 'whoami') {
+          print('someone curious. good start.');
+        } else if (c === 'ls' && arg.indexOf('puzzle') === 0) {
+          print('stream.txt   sequence.txt');
+        } else if (c === 'ls') {
+          print(`mission.txt   roles.txt   bird.txt   puzzle/   ` +
+            (unlocked ? 'charts/' : `<span class="t-dim">charts/ (locked)</span>`));
+        } else if (c === 'puzzle') {
+          print(escHtml(STREAM));
+          print('');
+          print(escHtml(SEQUENCE));
+        } else if (c === 'cat' && arg === 'bird.txt') {
+          print(`<span class="t-red">${escHtml(BIRD_TXT)}</span>`);
+        } else if (c === 'cat' && (arg === 'stream.txt' || arg === 'puzzle/stream.txt')) {
+          print(escHtml(STREAM));
+        } else if (c === 'cat' && (arg === 'sequence.txt' || arg === 'puzzle/sequence.txt')) {
+          print(escHtml(SEQUENCE));
+        } else if (c === 'cat' && arg.indexOf('charts') === 0) {
+          if (unlocked) print(escHtml(NORTHSTAR_TXT));
+          else print('locked. solve the puzzle.');
+        } else if (c === 'unlock') {
+          if (!arg) print('unlock what?');
+          else if (arg === 'northstar') {
+            if (unlocked) print('already open.');
+            else { unlocked = true; runGift(); }
+          } else print(`that's not it. the needle wobbles.`);
+        } else if (c === 'cat') {
+          print(`cat: ${escHtml(arg || '?')}: no such file`);
+        } else if (c === 'sudo') {
+          print(`you don't need permission to build here.`);
+        } else if (c === 'north') {
+          print('the needle knows the way home.');
+          target = 0; lastMove = -1e9; vel += 2.5;
+        } else if (c === 'clear') {
+          out.innerHTML = '';
+        } else if (c === 'exit' || c === 'back' || c === 'q') {
+          closeHatch();
+        } else {
+          print(`command not found: ${escHtml(c)} — try <span class="t-cmd" data-cmd="help">help</span>`);
+        }
+      }
+
+      function boot(fast) {
+        booted = true;
+        const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+        const fix = TZ_COORDS[tz];
+        const posLine = fix
+          ? `position fix ................. ~${fmtCoord(fix[0], 'N', 'S')} ${fmtCoord(fix[1], 'E', 'W')} \u00B7 ${tz}`
+          : 'position fix ................. unresolved — dead reckoning';
+        const lines = [
+          ['CARDINAL // NAVIGATION CONSOLE', 't-brass'],
+          ['calibrating compass .......... true north locked', 't-dim'],
+          [posLine, 't-dim'],
+          ['bearing to true north ........ 000\u00B0', 't-dim'],
+          ['crew manifest ................ incomplete — 2 seats open', 't-dim'],
+          ['', ''],
+        ];
+        const hint = () =>
+          print(`type <span class="t-cmd" data-cmd="help">help</span> — or click: ${link('mission')} ${link('roles')} ${link('apply')} ${link('exit')}`);
+        if (fast || reduced) {
+          lines.forEach(([t, k]) => print(t ? `<span class="${k}">${escHtml(t)}</span>` : ''));
+          hint();
+        } else {
+          lines.forEach(([t, k], i) =>
+            setTimeout(() => print(t ? `<span class="${k}">${escHtml(t)}</span>` : ''), i * 130));
+          setTimeout(hint, lines.length * 130 + 60);
+        }
+      }
+
+      function openHatch(fast) {
+        if (open) return;
+        open = true;
+        document.body.classList.add('hatch-arming');
+        const finish = () => {
+          document.body.classList.add('hatch-open');
+          term.classList.add('on');
+          setTimeout(() => term.classList.add('lit'), 30);
+          if (!booted) setTimeout(() => boot(fast), fast ? 0 : 350);
+          renderLine();
+          setTimeout(() => inp.focus({ preventScroll: true }), 80);
+          if (location.hash !== '#careers') location.hash = 'careers';
+        };
+        if (fast || reduced) finish();
+        else { spinNeedle(); setTimeout(finish, 480); } // panels part while the needle is still spinning
+      }
+
+      function closeHatch() {
+        if (!open) return;
+        open = false;
+        term.classList.remove('lit');
+        setTimeout(() => term.classList.remove('on'), 480);
+        document.body.classList.remove('hatch-open', 'hatch-arming');
+        inp.blur();
+        window.history.replaceState(null, '', location.pathname + location.search);
+        if (!reduced) { target = 0; lastMove = -1e9; vel += 2.2; } // recalibration wobble
+      }
+
+      /* ---- the present ---- */
+      const gift = document.getElementById('gift');
+
+      function confetti() {
+        const box = document.getElementById('gift-box').getBoundingClientRect();
+        const cx = box.left + box.width / 2, cy = box.top + box.height * 0.35;
+        const colors = ['#D6A85C', '#F4EFE6', '#C8324D'];
+        const parts = [];
+        for (let i = 0; i < 40; i++) {
+          const d = document.createElement('div');
+          d.style.cssText = 'position:fixed;left:0;top:0;width:' + (4 + Math.random() * 5) +
+            'px;height:' + (4 + Math.random() * 5) + 'px;background:' + colors[i % 3] +
+            ';z-index:7;pointer-events:none;';
+          document.body.appendChild(d);
+          const a = -Math.PI / 2 + (Math.random() - 0.5) * 1.7;
+          const v = 6 + Math.random() * 7.5;
+          parts.push({ d, x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
+            r: Math.random() * 360, vr: (Math.random() - 0.5) * 22 });
+        }
+        const t0 = performance.now();
+        (function f(now) {
+          const done = now - t0 > 1900;
+          parts.forEach(p => {
+            p.vy += 0.24; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+            p.d.style.transform = `translate(${p.x}px,${p.y}px) rotate(${p.r}deg)`;
+            if (done) p.d.style.opacity = 0;
+          });
+          if (!done) requestAnimationFrame(f);
+          else parts.forEach(p => p.d.remove());
+        })(t0);
+      }
+
+      function runGift() {
+        if (reduced) {
+          print(`<span class="t-brass">NORTHSTAR — correct. charts/ unlocked.</span>`);
+          print(escHtml(NORTHSTAR_TXT));
+          return;
+        }
+        giftOpen = true;
+        gift.classList.add('on');
+        setTimeout(() => gift.classList.add('lit'), 30);
+        setTimeout(() => gift.classList.add('shake'), 950);
+        setTimeout(() => { gift.classList.add('pop'); confetti(); }, 2050);
+        setTimeout(() => gift.classList.add('msg'), 3150);
+      }
+
+      function dismissGift() {
+        if (!giftOpen) return;
+        giftOpen = false;
+        gift.classList.remove('lit');
+        setTimeout(() => gift.classList.remove('on', 'shake', 'pop', 'msg'), 500);
+        print(`<span class="t-brass">NORTHSTAR — correct. charts/ unlocked.</span>`);
+        print(escHtml(NORTHSTAR_TXT));
+        inp.focus({ preventScroll: true });
+      }
+
+      gift.addEventListener('click', dismissGift);
+
+      mark.addEventListener('click', () => openHatch(false));
+      document.getElementById('careers-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        openHatch(false);
+      });
+      out.addEventListener('click', (e) => {
+        const c = e.target && e.target.dataset ? e.target.dataset.cmd : null;
+        if (c) exec(c);
+      });
+      term.addEventListener('click', () => { if (open) inp.focus({ preventScroll: true }); });
+
+      document.addEventListener('keydown', (e) => {
+        if (giftOpen && e.key === 'Escape') { dismissGift(); return; }
+        if (!open) return;
+        if (e.key === 'Escape') { closeHatch(); return; }
+        if (document.activeElement !== inp && !e.metaKey && !e.ctrlKey && e.key.length === 1)
+          inp.focus({ preventScroll: true });
+      });
+
+      inp.addEventListener('input', renderLine);
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const v = inp.value; inp.value = ''; renderLine(); exec(v);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (hIdx > 0) { hIdx--; inp.value = hist[hIdx] || ''; renderLine(); }
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (hIdx < hist.length) { hIdx++; inp.value = hist[hIdx] || ''; renderLine(); }
+        } else if (e.key === 'Tab') {
+          e.preventDefault();
+          const v = inp.value.toLowerCase();
+          if (v) {
+            const m = ['help', 'mission', 'roles', 'apply', 'whoami', 'puzzle', 'north', 'exit', 'clear', 'ls', 'unlock ', 'sudo ', 'cat ']
+              .find(nm => nm.indexOf(v) === 0);
+            if (m) { inp.value = m; renderLine(); }
+          }
+        }
+      });
+
+      if (location.hash === '#careers') openHatch(true);
     })();
   </script>
 </body>
