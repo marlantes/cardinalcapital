@@ -107,15 +107,43 @@
   }
 
   .mark {
-    width: clamp(30px, 4.6vw, 38px);
-    height: clamp(30px, 4.6vw, 38px);
+    width: clamp(38px, 5.8vw, 48px);
+    height: clamp(38px, 5.8vw, 48px);
     flex: none;
+    overflow: visible;
   }
 
+  .mark .ring   { fill: none; stroke: var(--brass); stroke-width: 1.25; opacity: 0.55; }
+  .mark .tick   { stroke: var(--brass); stroke-width: 1.5; opacity: 0.75; }
   .mark .n-lit  { fill: var(--cardinal); }
   .mark .n-dim  { fill: var(--cardinal); opacity: 0.55; }
-  .mark .p-lit  { fill: var(--cream); }
-  .mark .p-dim  { fill: var(--cream); opacity: 0.4; }
+  .mark .t-lit  { fill: var(--cream); opacity: 0.9; }
+  .mark .t-dim  { fill: var(--cream); opacity: 0.45; }
+  .mark .pivot  { fill: var(--ink); stroke: var(--brass); stroke-width: 1.25; }
+
+  /* the cardinal — takes flight when you find "contact" */
+  #bird {
+    position: fixed;
+    left: 0; top: 0;
+    width: 34px;
+    height: auto;
+    z-index: 3;
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+
+  #bird .body { fill: var(--cardinal); }
+  #bird .wing {
+    fill: #8E1F35;
+    transform-origin: 14px 12px;
+    animation: flap 0.24s ease-in-out infinite alternate;
+  }
+
+  @keyframes flap {
+    from { transform: rotate(-14deg); }
+    to   { transform: rotate(24deg); }
+  }
 
   /* contact — reads "contact", reveals the address on hover/focus */
   .contact {
@@ -201,18 +229,20 @@
     <div class="rule">
       <span class="line" aria-hidden="true"></span>
       <svg class="mark" viewBox="0 0 64 64" role="img" aria-label="Cardinal compass mark">
-        <!-- north point — elongated, the cardinal direction -->
-        <path class="n-lit" d="M32 0 L32 36 L26.5 30.5 Z" />
-        <path class="n-dim" d="M32 0 L37.5 30.5 L32 36 Z" />
-        <!-- east -->
-        <path class="p-lit" d="M56 36 L32 36 L37.5 30.5 Z" />
-        <path class="p-dim" d="M56 36 L37.5 41.5 L32 36 Z" />
-        <!-- south -->
-        <path class="p-lit" d="M32 62 L32 36 L37.5 41.5 Z" />
-        <path class="p-dim" d="M32 62 L26.5 41.5 L32 36 Z" />
-        <!-- west -->
-        <path class="p-lit" d="M8 36 L32 36 L26.5 41.5 Z" />
-        <path class="p-dim" d="M8 36 L26.5 30.5 L32 36 Z" />
+        <!-- fixed dial: brass ring + cardinal ticks -->
+        <circle class="ring" cx="32" cy="32" r="26" />
+        <line class="tick" x1="32" y1="1"  x2="32" y2="7" />
+        <line class="tick" x1="63" y1="32" x2="57" y2="32" />
+        <line class="tick" x1="32" y1="63" x2="32" y2="57" />
+        <line class="tick" x1="1"  y1="32" x2="7"  y2="32" />
+        <!-- needle: cardinal-red north tip, cream tail; rotates to your cursor -->
+        <g id="needle">
+          <path class="n-lit" d="M32 8 L32 34 L27.8 29.8 Z" />
+          <path class="n-dim" d="M32 8 L36.2 29.8 L32 34 Z" />
+          <path class="t-lit" d="M32 56 L32 32 L36 36 Z" />
+          <path class="t-dim" d="M32 56 L28 36 L32 32 Z" />
+          <circle class="pivot" cx="32" cy="32" r="3.2" />
+        </g>
       </svg>
       <span class="line" aria-hidden="true"></span>
     </div>
@@ -226,5 +256,93 @@
   </main>
 
   <footer class="foot">© MMXXVI · Cardinal · Cardinal Capital · Cardinal Technologies</footer>
+
+  <!-- the cardinal -->
+  <svg id="bird" viewBox="0 0 36 28" aria-hidden="true">
+    <path class="body" d="M2 10 L12 12.2 C13 9.4 15.4 7.6 18.4 7.2 L19.2 6.8 L21.2 1.6 L23.2 6.6 C25.8 7 28 8.6 29 11 L35 12.6 L29.2 14 C28.4 17.8 25 20.2 20.6 20.4 C16.8 20.6 13.4 19.4 11.6 17 L2 16 L5.4 13 Z" />
+    <path class="wing" d="M14.5 13 C18.5 10 23 10.2 25.6 12.6 C23.4 16.2 18 17.2 13.2 15.2 Z" />
+  </svg>
+
+  <script>
+    (() => {
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* ---- compass needle follows the cursor, springs back to north ---- */
+      const needle = document.getElementById('needle');
+      const mark = document.querySelector('.mark');
+      if (!reduced && matchMedia('(pointer: fine)').matches) {
+        let target = 0, angle = 0, vel = 0, lastMove = -1e9;
+
+        addEventListener('pointermove', (e) => {
+          const r = mark.getBoundingClientRect();
+          const dx = e.clientX - (r.left + r.width / 2);
+          const dy = e.clientY - (r.top + r.height / 2);
+          if (Math.hypot(dx, dy) < 12) return; // dead zone over the pivot
+          target = Math.atan2(dx, -dy) * 180 / Math.PI;
+          lastMove = performance.now();
+        });
+
+        document.documentElement.addEventListener('mouseleave', () => { lastMove = -1e9; });
+
+        (function tick(now) {
+          if (now - lastMove > 2500) target = 0; // drawn back to true north
+          let diff = ((target - angle + 540) % 360) - 180;
+          vel = vel * 0.95 + diff * 0.002; // gentle magnetic spring, heavy damping
+          angle += vel;
+          needle.setAttribute('transform', `rotate(${angle.toFixed(2)} 32 32)`);
+          requestAnimationFrame(tick);
+        })(0);
+      }
+
+      /* ---- the cardinal takes a random flight on hovering "contact" ---- */
+      const bird = document.getElementById('bird');
+      const contact = document.querySelector('.contact a');
+      let flying = false;
+
+      function bez(pts, t) {
+        const a = pts.map(p => [p[0], p[1]]);
+        for (let k = a.length - 1; k > 0; k--)
+          for (let i = 0; i < k; i++) {
+            a[i][0] += (a[i + 1][0] - a[i][0]) * t;
+            a[i][1] += (a[i + 1][1] - a[i][1]) * t;
+          }
+        return a[0];
+      }
+
+      function fly() {
+        if (flying || reduced) return;
+        flying = true;
+
+        const W = innerWidth, H = innerHeight;
+        const r = contact.getBoundingClientRect();
+        // random swoop: launch from "contact", wander, exit a random side
+        const pts = [[r.left + r.width / 2, r.top - 6]];
+        const n = 3 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < n; i++)
+          pts.push([W * (0.12 + 0.76 * Math.random()), H * (0.12 + 0.6 * Math.random())]);
+        pts.push([Math.random() < 0.5 ? -60 : W + 60, H * (0.08 + 0.45 * Math.random())]);
+
+        const dur = 5200 + Math.random() * 2400;
+        const t0 = performance.now();
+
+        (function step(now) {
+          const t = Math.min((now - t0) / dur, 1);
+          const [x, y] = bez(pts, t);
+          const [x2, y2] = bez(pts, Math.min(t + 0.012, 1));
+          const dx = x2 - x, dy = y2 - y;
+          const flip = dx < 0 ? -1 : 1;
+          const tilt = Math.max(-28, Math.min(28, Math.atan2(dy, Math.abs(dx)) * 57.3 * flip));
+          bird.style.opacity = t < 0.06 ? t / 0.06 : t > 0.92 ? (1 - t) / 0.08 : 1;
+          bird.style.transform =
+            `translate(${x - 15}px, ${y - 12}px) scaleX(${flip}) rotate(${tilt}deg)`;
+          if (t < 1) requestAnimationFrame(step);
+          else { bird.style.opacity = 0; flying = false; }
+        })(t0);
+      }
+
+      contact.addEventListener('mouseenter', fly);
+      contact.addEventListener('focus', fly);
+    })();
+  </script>
 </body>
 </html>
