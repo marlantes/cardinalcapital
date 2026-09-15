@@ -283,6 +283,57 @@
   @keyframes blink { 50% { opacity: 0; } }
   #term-in { position: fixed; opacity: 0; left: -9999px; top: 0; }
 
+  /* ---- about ---- */
+  #about {
+    position: fixed; inset: 0; z-index: 5;
+    display: none; opacity: 0;
+    align-items: center; justify-content: center;
+    padding: 2rem 1.5rem;
+    transition: opacity 0.45s ease;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 44%, rgba(214,168,92,0.06), transparent 65%),
+      rgba(5, 13, 24, 0.995);
+    cursor: pointer;
+  }
+  #about.on  { display: flex; }
+  #about.lit { opacity: 1; }
+  .about-card {
+    max-width: 30rem;
+    text-align: center;
+    transform: translateY(10px);
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #about.lit .about-card { transform: translateY(0); }
+  .about-eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: lowercase;
+    color: var(--brass);
+  }
+  .about-card .line {
+    display: block;
+    width: 64px; height: 1px;
+    margin: 1.4rem auto 2rem;
+    background: linear-gradient(to right, transparent, var(--brass), transparent);
+    opacity: 0.6;
+  }
+  .about-card p {
+    font-family: 'Fraunces', 'Cambria', 'Georgia', serif;
+    font-weight: 300;
+    font-size: clamp(0.98rem, 1.6vw, 1.12rem);
+    line-height: 1.65;
+    color: var(--cream);
+  }
+  .about-card p + p { margin-top: 1.1rem; }
+  .about-close {
+    margin-top: 2.6rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--slate);
+    opacity: 0.7;
+  }
+
   /* ---- the present ---- */
   #gift {
     position: fixed; inset: 0; z-index: 6;
@@ -399,7 +450,18 @@
     </p>
   </main>
 
-  <footer class="foot">© MMXXVI · Cardinal · Cardinal Capital · Cardinal Technologies · <a id="careers-link" href="#careers">careers</a></footer>
+  <footer class="foot">© MMXXVI · Cardinal · Cardinal Capital · Cardinal Technologies · <a id="about-link" href="#about">about</a> · <a id="careers-link" href="#careers">careers</a></footer>
+
+  <!-- about -->
+  <div id="about" role="dialog" aria-modal="true" aria-label="About Cardinal" aria-hidden="true">
+    <div class="about-card">
+      <div class="about-eyebrow">about</div>
+      <span class="line" aria-hidden="true"></span>
+      <p>We are technologists who invest. Our goal is to be the partner of choice for companies we admire that we can help build into market leaders.</p>
+      <p>Our focus is on customer value and growth. We only partner with a company when we believe there's an opportunity to positively change the course of the business, which means hiring more people, not less.</p>
+      <div class="about-close">esc or click to return</div>
+    </div>
+  </div>
 
   <!-- the cardinal -->
   <svg id="bird" viewBox="0 0 36 28" aria-hidden="true">
@@ -624,6 +686,16 @@ superpowers. Our focus is on being the best possible
 growth partner for businesses that will need more,
 not less, people in the future.`;
 
+      const ABOUT =
+`We are technologists who invest. Our goal is to be
+the partner of choice for companies we admire that
+we can help build into market leaders.
+
+Our focus is on customer value and growth. We only
+partner with a company when we believe there's an
+opportunity to positively change the course of the
+business, which means hiring more people, not less.`;
+
       const ROLES =
 `OPEN POSITIONS — 2
 
@@ -694,30 +766,31 @@ we read these first.`;
         const c = parts[0], arg = parts[1] || '';
 
         if (c === 'help') {
-          print(`<span class="t-dim">  mission     what we believe
+          print(`<span class="t-dim">  about       who we are
+  mission     what we believe
   roles       open positions (2)
   apply       open a mail draft
   whoami      identify yourself
   puzzle
-  exit        seal the hatch (esc works too)</span>`);
+  exit        close (esc works too)</span>`);
+        } else if (c === 'about' || (c === 'cat' && arg === 'about.txt')) {
+          print(escHtml(ABOUT));
         } else if (c === 'mission' || (c === 'cat' && arg === 'mission.txt')) {
           print(escHtml(MISSION));
         } else if (c === 'roles' || (c === 'cat' && arg === 'roles.txt')) {
           print(escHtml(ROLES));
           print(`type ${link('apply')} to open a draft.`);
         } else if (c === 'apply') {
-          print(`opening a draft → <span class="t-brass">contact@cardinalcapital.xyz</span>  ·  subject: "found the engine room"`);
-          print(`<span class="t-dim">proof of work, not a resume.</span>`);
+          print(`<span class="t-brass">contact@cardinalcapital.xyz</span>`);
           setTimeout(() => {
-            location.href = 'mailto:contact@cardinalcapital.xyz?subject=' +
-              encodeURIComponent('found the engine room');
+            location.href = 'mailto:contact@cardinalcapital.xyz';
           }, 400);
         } else if (c === 'whoami') {
           print('someone curious. good start.');
         } else if (c === 'ls' && arg.indexOf('puzzle') === 0) {
           print('stream.txt   sequence.txt');
         } else if (c === 'ls') {
-          print(`mission.txt   roles.txt   bird.txt   puzzle/   ` +
+          print(`about.txt   mission.txt   roles.txt   bird.txt   puzzle/   ` +
             (unlocked ? 'charts/' : `<span class="t-dim">charts/ (locked)</span>`));
         } else if (c === 'puzzle') {
           print(escHtml(STREAM));
@@ -867,6 +940,34 @@ we read these first.`;
 
       gift.addEventListener('click', dismissGift);
 
+      /* ---- about ---- */
+      const about = document.getElementById('about');
+      let aboutOpen = false;
+
+      function openAbout() {
+        if (aboutOpen || open) return;
+        aboutOpen = true;
+        about.classList.add('on');
+        about.setAttribute('aria-hidden', 'false');
+        setTimeout(() => about.classList.add('lit'), 30);
+        if (location.hash !== '#about') location.hash = 'about';
+      }
+
+      function closeAbout() {
+        if (!aboutOpen) return;
+        aboutOpen = false;
+        about.classList.remove('lit');
+        about.setAttribute('aria-hidden', 'true');
+        setTimeout(() => about.classList.remove('on'), 450);
+        window.history.replaceState(null, '', location.pathname + location.search);
+      }
+
+      about.addEventListener('click', closeAbout);
+      document.getElementById('about-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        openAbout();
+      });
+
       mark.addEventListener('click', () => openHatch(false));
       document.getElementById('careers-link').addEventListener('click', (e) => {
         e.preventDefault();
@@ -880,6 +981,7 @@ we read these first.`;
 
       document.addEventListener('keydown', (e) => {
         if (giftOpen && e.key === 'Escape') { dismissGift(); return; }
+        if (aboutOpen && e.key === 'Escape') { closeAbout(); return; }
         if (!open) return;
         if (e.key === 'Escape') { closeHatch(); return; }
         if (document.activeElement !== inp && !e.metaKey && !e.ctrlKey && e.key.length === 1)
@@ -900,7 +1002,7 @@ we read these first.`;
           e.preventDefault();
           const v = inp.value.toLowerCase();
           if (v) {
-            const m = ['help', 'mission', 'roles', 'apply', 'whoami', 'puzzle', 'north', 'exit', 'clear', 'ls', 'unlock ', 'sudo ', 'cat ']
+            const m = ['help', 'about', 'mission', 'roles', 'apply', 'whoami', 'puzzle', 'north', 'exit', 'clear', 'ls', 'unlock ', 'sudo ', 'cat ']
               .find(nm => nm.indexOf(v) === 0);
             if (m) { inp.value = m; renderLine(); }
           }
@@ -908,6 +1010,7 @@ we read these first.`;
       });
 
       if (location.hash === '#careers') openHatch(true);
+      else if (location.hash === '#about') openAbout();
       /* for the ones who open the console */
       try {
         console.log('%cCARDINAL', 'font-family: Georgia, serif; font-size: 26px; color: #C8324D; letter-spacing: 2px;');
