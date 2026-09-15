@@ -290,29 +290,42 @@
     padding: 2rem 1.5rem;
     transition: opacity 0.45s ease;
     background:
-      radial-gradient(ellipse 70% 55% at 50% 44%, rgba(176,133,68,0.07), transparent 65%),
-      rgba(244, 239, 230, 0.995);
+      radial-gradient(ellipse 120% 90% at 50% 44%, rgba(255,255,255,0.5), transparent 60%),
+      radial-gradient(ellipse 140% 120% at 50% 50%, transparent 55%, rgba(14,42,71,0.055)),
+      var(--cream);
     cursor: pointer;
+  }
+  #about::after {
+    content: '';
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(rgba(14,42,71,0.025) 1px, transparent 1px);
+    background-size: 3px 3px;
   }
   #about.on  { display: flex; }
   #about.lit { opacity: 1; }
   .about-card {
+    position: relative;
+    z-index: 1;
     max-width: 30rem;
     text-align: center;
     transform: translateY(10px);
     transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
   }
   #about.lit .about-card { transform: translateY(0); }
-  .about-eyebrow {
-    font-size: 0.72rem;
-    letter-spacing: 0.18em;
-    text-transform: lowercase;
-    color: var(--brass);
+  .about-title {
+    font-family: 'Fraunces', 'Cambria', 'Georgia', serif;
+    font-weight: 300;
+    font-variation-settings: 'opsz' 144;
+    font-size: clamp(2.2rem, 5vw, 3rem);
+    letter-spacing: 0.015em;
+    line-height: 1.05;
+    color: var(--navy);
   }
   .about-card .line {
     display: block;
     width: 64px; height: 1px;
-    margin: 1.4rem auto 2rem;
+    margin: 1.5rem auto 2rem;
     background: linear-gradient(to right, transparent, var(--brass), transparent);
     opacity: 0.6;
   }
@@ -454,7 +467,7 @@
   <!-- about -->
   <div id="about" role="dialog" aria-modal="true" aria-label="About Cardinal" aria-hidden="true">
     <div class="about-card">
-      <div class="about-eyebrow">about</div>
+      <h2 class="about-title">About</h2>
       <span class="line" aria-hidden="true"></span>
       <p>We are technologists who invest. Our goal is to be the partner of choice for companies we admire that we can help build into market leaders.</p>
       <p>Our focus is on customer value and growth. We only partner with a company when we believe there's an opportunity to positively change the course of the business, which means hiring more people, not less.</p>
