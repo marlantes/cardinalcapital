@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 260" role="img" aria-label="Illustration of Handsome Dan, the Yale bulldog, in a blue Y sweater">
+  <defs>
+    <radialGradient id="halo" cx="50%" cy="42%" r="60%">
+      <stop offset="0%" stop-color="#1B3150"/>
+      <stop offset="100%" stop-color="#0C1B2E"/>
+    </radialGradient>
+    <radialGradient id="fur" cx="45%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#FBF6EC"/>
+      <stop offset="100%" stop-color="#E9DEC9"/>
+    </radialGradient>
+    <linearGradient id="knit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#16467F"/>
+      <stop offset="100%" stop-color="#0E3462"/>
+    </linearGradient>
+    <clipPath id="headclip">
+      <path d="M62 98 C60 62 88 38 120 38 C152 38 180 62 178 98 C180 124 168 148 145 154 C132 158 108 158 95 154 C72 148 60 124 62 98 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- backdrop medallion -->
+  <circle cx="120" cy="128" r="114" fill="url(#halo)"/>
+  <circle cx="120" cy="128" r="114" fill="none" stroke="#D6A85C" stroke-opacity="0.45" stroke-width="1.2"/>
+  <circle cx="120" cy="128" r="106" fill="none" stroke="#D6A85C" stroke-opacity="0.15" stroke-width="1"/>
+
+  <!-- ground -->
+  <path d="M38 244 Q120 236 202 244" fill="none" stroke="#D6A85C" stroke-opacity="0.5" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- body in sweater -->
+  <path d="M58 242 C56 202 68 162 96 148 L144 148 C172 162 184 202 182 242 Z" fill="url(#knit)"/>
+  <!-- ribbed hem -->
+  <path d="M58 242 L182 242 L182 232 C150 236 90 236 58 232 Z" fill="#0A2A52"/>
+  <!-- sleeves / front legs -->
+  <rect x="76" y="176" width="28" height="60" rx="13" fill="#1A4D8A"/>
+  <rect x="136" y="176" width="28" height="60" rx="13" fill="#1A4D8A"/>
+  <rect x="76" y="226" width="28" height="10" rx="4" fill="#0A2A52"/>
+  <rect x="136" y="226" width="28" height="10" rx="4" fill="#0A2A52"/>
+  <!-- paws -->
+  <ellipse cx="90" cy="241" rx="16" ry="8" fill="url(#fur)" stroke="#CDBDA5" stroke-width="1.2"/>
+  <ellipse cx="150" cy="241" rx="16" ry="8" fill="url(#fur)" stroke="#CDBDA5" stroke-width="1.2"/>
+  <path d="M85 237 L85 245 M95 237 L95 245 M145 237 L145 245 M155 237 L155 245" stroke="#CDBDA5" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- the Y -->
+  <path d="M100 176 L112 176 L120 190 L128 176 L140 176 L125.5 199 L125.5 214 L114.5 214 L114.5 199 Z" fill="#0A2A52" transform="translate(1.5 1.5)"/>
+  <path d="M100 176 L112 176 L120 190 L128 176 L140 176 L125.5 199 L125.5 214 L114.5 214 L114.5 199 Z" fill="#F4EFE6"/>
+
+  <!-- collar ribbing -->
+  <ellipse cx="120" cy="152" rx="44" ry="10" fill="#0A2A52"/>
+
+  <!-- ears (rose ears) -->
+  <path d="M68 68 C56 54 64 38 84 44 C82 54 78 62 68 68 Z" fill="#7A5A3E"/>
+  <path d="M172 68 C184 54 176 38 156 44 C158 54 162 62 172 68 Z" fill="#E4D6BF" stroke="#CDBDA5" stroke-width="1.2"/>
+
+  <!-- head -->
+  <path d="M62 98 C60 62 88 38 120 38 C152 38 180 62 178 98 C180 124 168 148 145 154 C132 158 108 158 95 154 C72 148 60 124 62 98 Z" fill="url(#fur)"/>
+  <g clip-path="url(#headclip)">
+    <!-- tan patch over one eye, like Dan -->
+    <path d="M130 66 C136 55 158 54 168 66 C178 78 176 96 164 102 C152 108 138 102 133 91 C129 83 126 74 130 66 Z" fill="#C99A66" opacity="0.85"/>
+    <!-- side shading -->
+    <ellipse cx="64" cy="112" rx="14" ry="34" fill="#D9CBB2" opacity="0.5"/>
+    <ellipse cx="176" cy="112" rx="14" ry="34" fill="#D9CBB2" opacity="0.5"/>
+  </g>
+  <path d="M62 98 C60 62 88 38 120 38 C152 38 180 62 178 98 C180 124 168 148 145 154 C132 158 108 158 95 154 C72 148 60 124 62 98 Z" fill="none" stroke="#CDBDA5" stroke-width="1.4"/>
+
+  <!-- brow wrinkles -->
+  <path d="M100 56 Q120 49 140 56" fill="none" stroke="#CDBDA5" stroke-width="2" stroke-linecap="round"/>
+  <path d="M105 64 Q120 58.5 135 64" fill="none" stroke="#CDBDA5" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- eyes -->
+  <circle cx="96" cy="84" r="6.5" fill="#241C28"/>
+  <circle cx="144" cy="84" r="6.5" fill="#241C28"/>
+  <circle cx="94" cy="82" r="2" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="142" cy="82" r="2" fill="#FFFFFF" opacity="0.9"/>
+  <path d="M88 91 Q96 96 104 91" fill="none" stroke="#C98E8E" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M136 91 Q144 96 152 91" fill="none" stroke="#B07A6E" stroke-width="1.6" stroke-linecap="round"/>
+
+  <!-- nose roll -->
+  <path d="M98 92 Q120 81 142 92" fill="none" stroke="#CDBDA5" stroke-width="2.2" stroke-linecap="round"/>
+
+  <!-- jowls -->
+  <path d="M120 106 C110 106 92 106 84 117 C77 128 85 142 100 142 C111 142 118 133 120 124 Z" fill="#F1E7D6" stroke="#CDBDA5" stroke-width="1.4"/>
+  <path d="M120 106 C130 106 148 106 156 117 C163 128 155 142 140 142 C129 142 122 133 120 124 Z" fill="#F1E7D6" stroke="#CDBDA5" stroke-width="1.4"/>
+  <!-- whisker dots -->
+  <circle cx="100" cy="118" r="1.1" fill="#B8A88F"/><circle cx="106" cy="122" r="1.1" fill="#B8A88F"/><circle cx="98" cy="126" r="1.1" fill="#B8A88F"/>
+  <circle cx="140" cy="118" r="1.1" fill="#B8A88F"/><circle cx="134" cy="122" r="1.1" fill="#B8A88F"/><circle cx="142" cy="126" r="1.1" fill="#B8A88F"/>
+
+  <!-- underbite + two bottom teeth -->
+  <path d="M104 138 C108 150 132 150 136 138 C128 142 112 142 104 138 Z" fill="#E6D8C1" stroke="#CDBDA5" stroke-width="1.2"/>
+  <path d="M110 139 L112.5 132.5 L115 139 Z" fill="#FFFDF7" stroke="#CDBDA5" stroke-width="0.8" stroke-linejoin="round"/>
+  <path d="M125 139 L127.5 132.5 L130 139 Z" fill="#FFFDF7" stroke="#CDBDA5" stroke-width="0.8" stroke-linejoin="round"/>
+
+  <!-- nose -->
+  <path d="M105 96 C105 89 135 89 135 96 C135 104 125 107 120 107 C115 107 105 104 105 96 Z" fill="#241C28"/>
+  <ellipse cx="113" cy="98" rx="2.6" ry="1.6" fill="#0E0A10"/>
+  <ellipse cx="127" cy="98" rx="2.6" ry="1.6" fill="#0E0A10"/>
+  <ellipse cx="116" cy="93" rx="5" ry="1.8" fill="#FFFFFF" opacity="0.22"/>
+</svg>

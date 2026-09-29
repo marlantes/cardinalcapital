@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<!--
+
+                            N
+                            |
+                        .   |   .
+                          . | .
+                  W - - - - + - - - - E
+                          . | .
+                        .   |   .
+                            |
+                            S
+
+            C A R D I N A L  -  technologists who invest
+
+            the watchword is a good dog.
+
+                                                          -->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cardinal</title>
+<meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#081625" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 0 L37.5 30.5 L32 36 L26.5 30.5 Z' fill='%23C8324D'/%3E%3Cpath d='M56 36 L37.5 41.5 L32 36 L37.5 30.5 Z' fill='%23F4EFE6'/%3E%3Cpath d='M32 62 L26.5 41.5 L32 36 L37.5 41.5 Z' fill='%23F4EFE6'/%3E%3Cpath d='M8 36 L26.5 30.5 L32 36 L26.5 41.5 Z' fill='%23F4EFE6'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --cream:    #F4EFE6;
+    --ink:      #081625;
+    --ink-deep: #050D18;
+    --cardinal: #C8324D;
+    --brass:    #D6A85C;
+    --slate:    #7E8CA0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { min-height: 100%; }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 44%, rgba(214,168,92,0.07), transparent 65%),
+      radial-gradient(ellipse 140% 120% at 50% 50%, transparent 50%, var(--ink-deep)),
+      var(--ink);
+    background-attachment: fixed;
+    color: var(--cream);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(rgba(244,239,230,0.035) 1px, transparent 1px);
+    background-size: 3px 3px;
+    z-index: 1;
+  }
+
+  .stage { position: relative; z-index: 2; width: 100%; max-width: 32rem; text-align: center; }
+
+  .wordmark {
+    font-family: 'Fraunces', 'Cambria', 'Georgia', serif;
+    font-weight: 300;
+    font-variation-settings: 'opsz' 144;
+    font-size: clamp(2.6rem, 8vw, 4rem);
+    letter-spacing: 0.015em;
+    line-height: 1.05;
+    user-select: none;
+  }
+
+  .rule {
+    margin: 1.4rem auto 0;
+    display: flex; align-items: center; justify-content: center; gap: 1rem;
+  }
+  .rule .line { width: clamp(48px, 9vw, 84px); height: 1px; background: linear-gradient(to right, transparent, var(--brass)); opacity: 0.6; }
+  .rule .line:last-child { background: linear-gradient(to left, transparent, var(--brass)); }
+  .mark { width: 34px; height: 34px; flex: none; overflow: visible; }
+  .mark .ring  { fill: none; stroke: var(--brass); stroke-width: 1.25; opacity: 0.55; }
+  .mark .tick  { stroke: var(--brass); stroke-width: 1.5; opacity: 0.75; }
+  .mark .n-lit { fill: var(--cardinal); }
+  .mark .n-dim { fill: var(--cardinal); opacity: 0.55; }
+  .mark .t-lit { fill: var(--cream); opacity: 0.9; }
+  .mark .t-dim { fill: var(--cream); opacity: 0.45; }
+  .mark .pivot { fill: var(--ink); stroke: var(--brass); stroke-width: 1.25; }
+
+  /* ---- gate ---- */
+  .kicker {
+    margin-top: 2.2rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  .prompt { margin-top: 1rem; font-size: 0.95rem; line-height: 1.6; color: var(--slate); }
+
+  form { margin-top: 1.8rem; display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+
+  input[type="password"], input[type="text"] {
+    flex: 1 1 15rem;
+    max-width: 18rem;
+    background: rgba(5,13,24,0.6);
+    border: 1px solid rgba(214,168,92,0.35);
+    border-radius: 100px;
+    padding: 0.78rem 1.2rem;
+    color: var(--cream);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.92rem;
+    text-align: center;
+    letter-spacing: 0.04em;
+    transition: border-color 0.25s ease;
+  }
+  input::placeholder { color: var(--slate); opacity: 0.8; }
+  input:focus { outline: none; border-color: var(--brass); }
+
+  button {
+    background: var(--brass);
+    color: var(--ink);
+    border: 1px solid var(--brass);
+    border-radius: 100px;
+    padding: 0.78rem 1.5rem;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.92rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.25s ease, transform 0.2s ease;
+  }
+  button:hover { background: #EBC68A; }
+  button:active { transform: translateY(1px); }
+
+  .miss { margin-top: 1rem; font-size: 0.8rem; color: var(--cardinal); min-height: 1.2em; opacity: 0; transition: opacity 0.25s ease; }
+  .miss.show { opacity: 1; }
+
+  .shake { animation: shake 0.42s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-7px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(2px); }
+  }
+
+  /* ---- the reveal ---- */
+  #vault { display: none; }
+  #vault.on { display: block; animation: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+  .portrait {
+    margin: 2.2rem auto 0;
+    width: clamp(190px, 52vw, 260px);
+    display: block;
+    filter: drop-shadow(0 18px 40px rgba(5,13,24,0.6));
+  }
+
+  .caption { margin-top: 1rem; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass); }
+
+  .note {
+    margin: 1.8rem auto 0;
+    max-width: 26rem;
+    font-family: 'Fraunces', 'Cambria', 'Georgia', serif;
+    font-weight: 300;
+    font-size: clamp(0.98rem, 1.6vw, 1.12rem);
+    line-height: 1.65;
+  }
+
+  .links { margin-top: 2rem; display: flex; gap: 1.6rem; justify-content: center; flex-wrap: wrap; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; }
+  .links a { color: var(--slate); text-decoration: none; border-bottom: 1px solid rgba(214,168,92,0.35); padding-bottom: 2px; transition: color 0.25s ease, border-color 0.25s ease; }
+  .links a:hover { color: var(--brass); border-bottom-color: var(--brass); }
+
+  .foot { margin-top: 2.6rem; font-size: 0.64rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--slate); opacity: 0.5; }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    #vault.on, .shake { animation: none; }
+  }
+
+  ::selection { background: var(--cardinal); color: var(--cream); }
+</style>
+</head>
+<body>
+  <main class="stage">
+    <h1 class="wordmark">Cardinal</h1>
+
+    <div class="rule">
+      <span class="line" aria-hidden="true"></span>
+      <svg class="mark" viewBox="0 0 64 64" role="img" aria-label="Cardinal compass mark">
+        <circle class="ring" cx="32" cy="32" r="26" />
+        <line class="tick" x1="32" y1="1"  x2="32" y2="7" />
+        <line class="tick" x1="63" y1="32" x2="57" y2="32" />
+        <line class="tick" x1="32" y1="63" x2="32" y2="57" />
+        <line class="tick" x1="1"  y1="32" x2="7"  y2="32" />
+        <g>
+          <path class="n-lit" d="M32 8 L32 34 L27.8 29.8 Z" />
+          <path class="n-dim" d="M32 8 L36.2 29.8 L32 34 Z" />
+          <path class="t-lit" d="M32 56 L32 32 L36 36 Z" />
+          <path class="t-dim" d="M32 56 L28 36 L32 32 Z" />
+          <circle class="pivot" cx="32" cy="32" r="3.2" />
+        </g>
+      </svg>
+      <span class="line" aria-hidden="true"></span>
+    </div>
+
+    <!-- the gate -->
+    <div id="gate">
+      <div class="kicker">For Yale Investments</div>
+      <p class="prompt">This page is held for one reader.<br />The watchword is a good dog.</p>
+      <form id="form" autocomplete="off">
+        <input id="pw" type="password" placeholder="watchword" aria-label="Watchword" autocomplete="off" autocapitalize="none" spellcheck="false" />
+        <button type="submit">Enter</button>
+      </form>
+      <div class="miss" id="miss" role="status" aria-live="polite"></div>
+    </div>
+
+    <!-- the reveal -->
+    <div id="vault">
+      <img class="portrait" src="handsome-dan.svg" alt="Illustration of Handsome Dan, the Yale bulldog, in a blue Y sweater" />
+      <div class="caption">Good boy</div>
+
+      <p class="note">Thank you for watching. Everything here is a work in progress, which is the honest state of a first fund. I would like to build Cardinal with Yale as a partner from day one.</p>
+
+      <div class="links">
+        <!-- <a href="VIDEO_URL_HERE" target="_blank" rel="noopener">The video</a> -->
+        <a href="mailto:contact@cardinalcapital.xyz?subject=Prospect%20Fellowship">Email me</a>
+        <a href="https://cardinalcapital.xyz">cardinalcapital.xyz</a>
+      </div>
+
+      <div class="foot">Alex Marlantes · Cardinal</div>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const HASH = '0acda9216a7d78b472f2fc98aff316e8db00668d53820e0b1c8ae8205794ea93';
+      const gate = document.getElementById('gate');
+      const vault = document.getElementById('vault');
+      const form = document.getElementById('form');
+      const pw = document.getElementById('pw');
+      const miss = document.getElementById('miss');
+      const MISSES = [
+        'Not the dog we had in mind.',
+        'Try again. He answers to one name.',
+        'Close. He wears it on his sweater.',
+      ];
+      let tries = 0;
+
+      const norm = (s) => s.toLowerCase().replace(/[^a-z]/g, '');
+
+      async function sha256(str) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+        return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      function unlock(remember) {
+        gate.style.display = 'none';
+        vault.classList.add('on');
+        if (remember) { try { sessionStorage.setItem('cc-prospect', '1'); } catch (e) {} }
+      }
+
+      try { if (sessionStorage.getItem('cc-prospect') === '1') unlock(false); } catch (e) {}
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const attempt = norm(pw.value);
+        let ok = false;
+        try {
+          ok = attempt.length > 0 && (await sha256(attempt)) === HASH;
+        } catch (err) {
+          ok = attempt === 'handsomedan'; // crypto.subtle needs https; localhost and the live site both qualify
+        }
+        if (ok) { unlock(true); return; }
+        miss.textContent = MISSES[Math.min(tries, MISSES.length - 1)];
+        miss.classList.add('show');
+        form.classList.remove('shake');
+        void form.offsetWidth;
+        form.classList.add('shake');
+        pw.select();
+        tries++;
+      });
+
+      pw.focus({ preventScroll: true });
+    })();
+  </script>
+</body>
+</html>
