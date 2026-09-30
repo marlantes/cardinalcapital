@@ -13,13 +13,11 @@
 
             C A R D I N A L  -  technologists who invest
 
-            the watchword is a good dog.
-
                                                           -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Cardinal</title>
 <meta name="robots" content="noindex, nofollow" />
 <meta name="theme-color" content="#081625" />
@@ -27,6 +25,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<!--
+  Everything shown after the password (the video, the slides, the words) is
+  stored in vault/ as AES-256-GCM ciphertext and decrypted here, in the
+  browser, with a key derived from the password. This repository is public,
+  so nothing private is ever committed in the clear. See _seal/seal.mjs.
+-->
 <style>
   :root {
     --cream:    #F4EFE6;
@@ -35,26 +39,26 @@
     --cardinal: #C8324D;
     --brass:    #D6A85C;
     --slate:    #7E8CA0;
+    --hair:     rgba(214,168,92,0.16);
+    --line:     rgba(214,168,92,0.30);
+    --serif:    'Fraunces', 'Cambria', 'Georgia', serif;
+    --sans:     'Inter', system-ui, -apple-system, sans-serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html, body { min-height: 100%; }
+  html { -webkit-text-size-adjust: 100%; }
 
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100svh;
+    font-family: var(--sans);
+    color: var(--cream);
     background:
-      radial-gradient(ellipse 70% 55% at 50% 44%, rgba(214,168,92,0.07), transparent 65%),
+      radial-gradient(ellipse 70% 55% at 50% 30%, rgba(214,168,92,0.07), transparent 65%),
       radial-gradient(ellipse 140% 120% at 50% 50%, transparent 50%, var(--ink-deep)),
       var(--ink);
     background-attachment: fixed;
-    color: var(--cream);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2.5rem 1.5rem;
   }
 
   body::after {
@@ -63,82 +67,88 @@
     pointer-events: none;
     background-image: radial-gradient(rgba(244,239,230,0.035) 1px, transparent 1px);
     background-size: 3px 3px;
-    z-index: 1;
+    z-index: 0;
   }
 
-  .stage { position: relative; z-index: 2; width: 100%; max-width: 32rem; text-align: center; }
+  [hidden] { display: none !important; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  ::selection { background: var(--cardinal); color: var(--cream); }
 
-  .wordmark {
-    font-family: 'Fraunces', 'Cambria', 'Georgia', serif;
-    font-weight: 300;
-    font-variation-settings: 'opsz' 144;
-    font-size: clamp(2.6rem, 8vw, 4rem);
-    letter-spacing: 0.015em;
-    line-height: 1.05;
-    user-select: none;
-  }
-
-  .rule {
-    margin: 1.4rem auto 0;
-    display: flex; align-items: center; justify-content: center; gap: 1rem;
-  }
-  .rule .line { width: clamp(48px, 9vw, 84px); height: 1px; background: linear-gradient(to right, transparent, var(--brass)); opacity: 0.6; }
-  .rule .line:last-child { background: linear-gradient(to left, transparent, var(--brass)); }
-  .mark { width: 34px; height: 34px; flex: none; overflow: visible; }
-  .mark .ring  { fill: none; stroke: var(--brass); stroke-width: 1.25; opacity: 0.55; }
-  .mark .tick  { stroke: var(--brass); stroke-width: 1.5; opacity: 0.75; }
-  .mark .n-lit { fill: var(--cardinal); }
-  .mark .n-dim { fill: var(--cardinal); opacity: 0.55; }
-  .mark .t-lit { fill: var(--cream); opacity: 0.9; }
-  .mark .t-dim { fill: var(--cream); opacity: 0.45; }
-  .mark .pivot { fill: var(--ink); stroke: var(--brass); stroke-width: 1.25; }
-
-  /* ---- gate ---- */
   .kicker {
-    margin-top: 2.2rem;
     font-size: 0.7rem;
-    letter-spacing: 0.22em;
+    font-weight: 500;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
     color: var(--brass);
   }
 
-  .prompt { margin-top: 1rem; font-size: 0.95rem; line-height: 1.6; color: var(--slate); }
+  /* the compass mark, shared by the gate, the header and the close (#compass below) */
+  .mark { width: 34px; height: 34px; flex: none; overflow: visible; }
 
-  form { margin-top: 1.8rem; display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+  .rule { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+  .rule .line { width: clamp(48px, 9vw, 84px); height: 1px; background: linear-gradient(to right, transparent, var(--brass)); opacity: 0.6; }
+  .rule .line:last-child { background: linear-gradient(to left, transparent, var(--brass)); }
 
-  input[type="password"], input[type="text"] {
-    flex: 1 1 15rem;
-    max-width: 18rem;
-    background: rgba(5,13,24,0.6);
-    border: 1px solid rgba(214,168,92,0.35);
-    border-radius: 100px;
-    padding: 0.78rem 1.2rem;
-    color: var(--cream);
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 0.92rem;
+  /* ------------------------------------------------------------ gate */
+  .gate {
+    position: relative; z-index: 1;
+    min-height: 100svh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 3rem 1.25rem calc(3rem + env(safe-area-inset-bottom, 0px));
     text-align: center;
-    letter-spacing: 0.04em;
-    transition: border-color 0.25s ease;
+    transition: opacity 0.45s ease, transform 0.45s ease;
   }
-  input::placeholder { color: var(--slate); opacity: 0.8; }
-  input:focus { outline: none; border-color: var(--brass); }
+  .gate.leaving { opacity: 0; transform: translateY(-10px); }
 
-  button {
+  .wordmark {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-variation-settings: 'opsz' 144;
+    font-size: clamp(3rem, 10vw, 4.75rem);
+    letter-spacing: 0.015em;
+    line-height: 1.02;
+    user-select: none;
+  }
+  .gate .rule { margin-top: 1.5rem; }
+  .gate .kicker { margin-top: 2.4rem; }
+
+  .pw { position: relative; width: min(21rem, 100%); margin-top: 1.4rem; }
+  .pw input {
+    width: 100%;
+    height: 3.3rem;
+    padding: 0 3.7rem;
+    border-radius: 100px;
+    background: rgba(5,13,24,0.55);
+    border: 1px solid rgba(214,168,92,0.35);
+    color: var(--cream);
+    font: 400 0.98rem var(--sans);
+    letter-spacing: 0.08em;
+    text-align: center;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .pw input::placeholder { color: var(--slate); letter-spacing: 0.04em; }
+  .pw input:focus { outline: none; border-color: var(--brass); box-shadow: 0 0 0 4px rgba(214,168,92,0.12); }
+  .pw input:disabled { opacity: 0.6; }
+
+  .pw button {
+    position: absolute; right: 0.4rem; top: 0.4rem;
+    width: 2.5rem; height: 2.5rem;
+    display: grid; place-items: center;
+    border: 0; border-radius: 50%;
     background: var(--brass);
     color: var(--ink);
-    border: 1px solid var(--brass);
-    border-radius: 100px;
-    padding: 0.78rem 1.5rem;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 0.92rem;
-    font-weight: 500;
     cursor: pointer;
-    transition: background 0.25s ease, transform 0.2s ease;
+    transition: background 0.2s ease, transform 0.15s ease;
   }
-  button:hover { background: #EBC68A; }
-  button:active { transform: translateY(1px); }
+  .pw button:hover { background: #EBC68A; }
+  .pw button:active { transform: scale(0.96); }
+  .pw button:focus-visible { outline: 2px solid var(--cream); outline-offset: 3px; }
+  .pw button svg { width: 18px; height: 18px; }
+  .pw button .spin { display: none; width: 18px; height: 18px; border: 2px solid rgba(8,22,37,0.25); border-top-color: var(--ink); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .pw.busy button .arrow { display: none; }
+  .pw.busy button .spin { display: block; }
 
-  .miss { margin-top: 1rem; font-size: 0.8rem; color: var(--cardinal); min-height: 1.2em; opacity: 0; transition: opacity 0.25s ease; }
+  .miss { margin-top: 1rem; min-height: 1.2em; font-size: 0.82rem; color: #E6788C; opacity: 0; transition: opacity 0.25s ease; }
   .miss.show { opacity: 1; }
 
   .shake { animation: shake 0.42s ease; }
@@ -149,146 +159,667 @@
     60% { transform: translateX(-4px); }
     80% { transform: translateX(2px); }
   }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ---- the reveal ---- */
-  #vault { display: none; }
-  #vault.on { display: block; animation: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  /* ------------------------------------------------------------ vault */
+  .vault {
+    position: relative; z-index: 1;
+    width: 100%;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 1.6rem clamp(1rem, 4vw, 2.5rem) calc(3rem + env(safe-area-inset-bottom, 0px));
+    animation: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
-  .portrait {
-    margin: 2.2rem auto 0;
-    width: clamp(190px, 52vw, 260px);
-    display: block;
-    filter: drop-shadow(0 18px 40px rgba(5,13,24,0.6));
+  .top {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid var(--hair);
+  }
+  .brand { display: inline-flex; align-items: center; gap: 0.65rem; color: var(--cream); text-decoration: none; }
+  .brand .mark { width: 26px; height: 26px; }
+  .brand span { font-family: var(--serif); font-weight: 300; font-variation-settings: 'opsz' 144; font-size: 1.6rem; letter-spacing: 0.02em; }
+  .top .kicker { color: var(--slate); }
+  #header:focus { outline: none; }
+
+  .block { margin-top: clamp(2rem, 5vw, 3.25rem); }
+  .head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+  .counter { font-size: 0.74rem; font-weight: 500; letter-spacing: 0.18em; color: var(--slate); font-variant-numeric: tabular-nums; }
+
+  /* video */
+  .player {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--ink-deep);
+    border: 1px solid var(--line);
+    box-shadow: 0 40px 90px -35px rgba(0,0,0,0.75);
+  }
+  .player video, .player iframe, .player .poster {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    border: 0; display: block;
+    background: var(--ink-deep);
+  }
+  .player .poster { object-fit: cover; opacity: 0; transition: opacity 0.6s ease; }
+  .player .poster.on { opacity: 1; }
+  .player .shade {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(5,13,24,0.15), rgba(5,13,24,0.55));
+    transition: opacity 0.4s ease;
+  }
+  .player.playing .shade, .player.playing .poster, .player.playing .play, .player.playing .status { opacity: 0; pointer-events: none; }
+
+  .play {
+    position: absolute; left: 50%; top: 50%;
+    width: 5.6rem; height: 5.6rem;
+    transform: translate(-50%, -50%);
+    border: 0; border-radius: 50%;
+    display: grid; place-items: center;
+    color: var(--cream);
+    background: rgba(8,22,37,0.5);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    transition: transform 0.25s ease, background 0.25s ease, opacity 0.3s ease;
+  }
+  .play:hover { transform: translate(-50%, -50%) scale(1.05); background: rgba(8,22,37,0.62); }
+  .play:focus-visible { outline: 2px solid var(--brass); outline-offset: 4px; }
+  .play .ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+  .play .track { fill: none; stroke: rgba(244,239,230,0.28); stroke-width: 1.4; }
+  .play .prog  { fill: none; stroke: var(--brass); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 289.03; stroke-dashoffset: 289.03; transition: stroke-dashoffset 0.25s linear, opacity 0.4s ease; }
+  .play.ready .prog { opacity: 0; }
+  .play.ready .track { stroke: rgba(214,168,92,0.7); }
+  .play .tri { width: 1.85rem; height: 1.85rem; margin-left: 0.28rem; fill: currentColor; }
+
+  .status {
+    position: absolute; left: 0; right: 0; bottom: 1.1rem;
+    text-align: center;
+    font-size: 0.68rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(244,239,230,0.72);
+    transition: opacity 0.3s ease;
   }
 
-  .caption { margin-top: 1rem; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass); }
+  .meta { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.9rem; font-size: 0.82rem; color: var(--slate); }
+  .meta .dur { font-variant-numeric: tabular-nums; letter-spacing: 0.06em; }
 
-  .note {
-    margin: 1.8rem auto 0;
-    max-width: 26rem;
-    font-family: 'Fraunces', 'Cambria', 'Georgia', serif;
+  /* deck */
+  .deck {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #FBFAF7;
+    border: 1px solid var(--line);
+    box-shadow: 0 40px 90px -35px rgba(0,0,0,0.75);
+    cursor: pointer;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    outline: none;
+  }
+  .deck:focus-visible { box-shadow: 0 0 0 2px var(--brass), 0 40px 90px -35px rgba(0,0,0,0.75); }
+  .deck .slide {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    -webkit-user-drag: none;
+  }
+  .deck .slide.front { opacity: 1; }
+  .deck .wait { position: absolute; inset: 0; display: grid; place-items: center; color: #9aa3ae; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; }
+
+  .edge, .full {
+    position: absolute;
+    display: grid; place-items: center;
+    width: 2.75rem; height: 2.75rem;
+    border-radius: 50%;
+    border: 1px solid rgba(214,168,92,0.4);
+    background: rgba(8,22,37,0.78);
+    color: var(--cream);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+  .edge { top: 50%; transform: translateY(-50%); }
+  .edge.prev { left: 1rem; }
+  .edge.next { right: 1rem; }
+  .full { right: 1rem; bottom: 1rem; width: 2.4rem; height: 2.4rem; }
+  .edge svg, .full svg { width: 16px; height: 16px; }
+  .deck:hover .edge, .deck:hover .full, .deck:focus-within .edge, .deck:focus-within .full { opacity: 1; }
+  .edge:hover, .full:hover { background: var(--ink); border-color: var(--brass); }
+  .edge:disabled { opacity: 0 !important; pointer-events: none; }
+  .edge:focus-visible, .full:focus-visible { opacity: 1; outline: 2px solid var(--brass); outline-offset: 2px; }
+  @media (hover: none) {
+    .edge { opacity: 0.92; width: 2.3rem; height: 2.3rem; }
+    .edge.prev { left: 0.5rem; } .edge.next { right: 0.5rem; }
+  }
+
+  .deck:fullscreen { background: #000; border: 0; border-radius: 0; box-shadow: none; }
+  .deck:-webkit-full-screen { background: #000; border: 0; border-radius: 0; box-shadow: none; width: 100%; height: 100%; }
+
+  .thumbs {
+    display: flex; gap: 0.6rem;
+    margin-top: 1rem;
+    padding: 0.2rem 0.1rem 0.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(214,168,92,0.3) transparent;
+  }
+  .thumb {
+    /* ten fit on one row on a laptop; the row scrolls on a phone */
+    flex: 1 1 0;
+    min-width: 5.25rem;
+    max-width: 7.4rem;
+    aspect-ratio: 16 / 9;
+    padding: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(214,168,92,0.18);
+    background: rgba(244,239,230,0.06);
+    opacity: 0.5;
+    cursor: pointer;
+    scroll-snap-align: start;
+    transition: opacity 0.2s ease, border-color 0.2s ease;
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb:hover { opacity: 0.85; }
+  .thumb[aria-selected="true"] { opacity: 1; border-color: var(--brass); }
+  .thumb:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+  /* close */
+  .close { margin-top: clamp(3.5rem, 9vw, 6rem); text-align: center; }
+  .close .rule { margin-bottom: 2rem; }
+  .close .say {
+    font-family: var(--serif);
     font-weight: 300;
-    font-size: clamp(0.98rem, 1.6vw, 1.12rem);
-    line-height: 1.65;
+    font-variation-settings: 'opsz' 144;
+    font-size: clamp(1.45rem, 3.4vw, 2.2rem);
+    line-height: 1.28;
+    max-width: 30ch;
+    margin: 0 auto;
+    text-wrap: balance;
   }
+  .sig { margin-top: 1.6rem; display: flex; flex-direction: column; gap: 0.25rem; }
+  .sig .who { font-weight: 500; letter-spacing: 0.02em; }
+  .sig .what { font-size: 0.85rem; color: var(--slate); }
 
-  .links { margin-top: 2rem; display: flex; gap: 1.6rem; justify-content: center; flex-wrap: wrap; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; }
+  .links { margin-top: 1.8rem; display: flex; gap: 1.6rem; justify-content: center; flex-wrap: wrap; font-size: 0.76rem; letter-spacing: 0.16em; text-transform: uppercase; }
   .links a { color: var(--slate); text-decoration: none; border-bottom: 1px solid rgba(214,168,92,0.35); padding-bottom: 2px; transition: color 0.25s ease, border-color 0.25s ease; }
-  .links a:hover { color: var(--brass); border-bottom-color: var(--brass); }
+  .links a:hover, .links a:focus-visible { color: var(--brass); border-bottom-color: var(--brass); outline: none; }
 
-  .foot { margin-top: 2.6rem; font-size: 0.64rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--slate); opacity: 0.5; }
+  .foot { margin-top: 3.2rem; text-align: center; font-size: 0.64rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--slate); opacity: 0.55; }
 
-  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 560px) {
+    .top { justify-content: center; }
+    .meta { flex-direction: column; gap: 0.2rem; }
+    .play { width: 4.6rem; height: 4.6rem; }
+  }
 
   @media (prefers-reduced-motion: reduce) {
-    #vault.on, .shake { animation: none; }
+    .vault, .shake { animation: none; }
+    .gate, .deck .slide, .player .poster, .play .prog { transition: none; }
   }
-
-  ::selection { background: var(--cardinal); color: var(--cream); }
 </style>
 </head>
 <body>
-  <main class="stage">
-    <h1 class="wordmark">Cardinal</h1>
 
-    <div class="rule">
-      <span class="line" aria-hidden="true"></span>
-      <svg class="mark" viewBox="0 0 64 64" role="img" aria-label="Cardinal compass mark">
-        <circle class="ring" cx="32" cy="32" r="26" />
-        <line class="tick" x1="32" y1="1"  x2="32" y2="7" />
-        <line class="tick" x1="63" y1="32" x2="57" y2="32" />
-        <line class="tick" x1="32" y1="63" x2="32" y2="57" />
-        <line class="tick" x1="1"  y1="32" x2="7"  y2="32" />
-        <g>
-          <path class="n-lit" d="M32 8 L32 34 L27.8 29.8 Z" />
-          <path class="n-dim" d="M32 8 L36.2 29.8 L32 34 Z" />
-          <path class="t-lit" d="M32 56 L32 32 L36 36 Z" />
-          <path class="t-dim" d="M32 56 L28 36 L32 32 Z" />
-          <circle class="pivot" cx="32" cy="32" r="3.2" />
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <!-- Colours are attributes, not CSS: page styles cannot reach inside a <use> copy. -->
+      <symbol id="compass" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#D6A85C" stroke-width="1.25" opacity="0.55" />
+        <g stroke="#D6A85C" stroke-width="1.5" opacity="0.75">
+          <line x1="32" y1="1"  x2="32" y2="7" />
+          <line x1="63" y1="32" x2="57" y2="32" />
+          <line x1="32" y1="63" x2="32" y2="57" />
+          <line x1="1"  y1="32" x2="7"  y2="32" />
         </g>
-      </svg>
-      <span class="line" aria-hidden="true"></span>
+        <path d="M32 8 L32 34 L27.8 29.8 Z" fill="#C8324D" />
+        <path d="M32 8 L36.2 29.8 L32 34 Z" fill="#C8324D" opacity="0.55" />
+        <path d="M32 56 L32 32 L36 36 Z" fill="#F4EFE6" opacity="0.9" />
+        <path d="M32 56 L28 36 L32 32 Z" fill="#F4EFE6" opacity="0.45" />
+        <circle cx="32" cy="32" r="3.2" fill="#081625" stroke="#D6A85C" stroke-width="1.25" />
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- the gate: all that is public -->
+  <main class="gate" id="gate">
+    <h1 class="wordmark">Cardinal</h1>
+    <div class="rule" aria-hidden="true">
+      <span class="line"></span><svg class="mark"><use href="#compass" /></svg><span class="line"></span>
     </div>
-
-    <!-- the gate -->
-    <div id="gate">
-      <div class="kicker">For Yale Investments</div>
-      <p class="prompt">This page is held for one reader.<br />The watchword is a good dog.</p>
-      <form id="form" autocomplete="off">
-        <input id="pw" type="password" placeholder="watchword" aria-label="Watchword" autocomplete="off" autocapitalize="none" spellcheck="false" />
-        <button type="submit">Enter</button>
-      </form>
-      <div class="miss" id="miss" role="status" aria-live="polite"></div>
-    </div>
-
-    <!-- the reveal -->
-    <div id="vault">
-      <img class="portrait" src="handsome-dan.svg" alt="Illustration of Handsome Dan, the Yale bulldog, in a blue Y sweater" />
-      <div class="caption">Good boy</div>
-
-      <p class="note">Thank you for watching. Everything here is a work in progress, which is the honest state of a first fund. I would like to build Cardinal with Yale as a partner from day one.</p>
-
-      <div class="links">
-        <!-- <a href="VIDEO_URL_HERE" target="_blank" rel="noopener">The video</a> -->
-        <a href="mailto:contact@cardinalcapital.xyz?subject=Prospect%20Fellowship">Email me</a>
-        <a href="https://cardinalcapital.xyz">cardinalcapital.xyz</a>
-      </div>
-
-      <div class="foot">Alex Marlantes · Cardinal</div>
-    </div>
+    <div class="kicker">For Yale Investments</div>
+    <form class="pw" id="form" autocomplete="off" novalidate>
+      <label class="sr" for="pw">Password</label>
+      <input id="pw" type="password" placeholder="Password" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" />
+      <button type="submit" id="go" aria-label="Open">
+        <svg class="arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11M11 5.5 15.5 10 11 14.5" /></svg>
+        <span class="spin" aria-hidden="true"></span>
+      </button>
+    </form>
+    <p class="miss" id="miss" role="alert" aria-live="assertive"></p>
   </main>
 
+  <!-- the page behind it; every word and image here arrives encrypted -->
+  <div class="vault" id="vault" hidden>
+    <header class="top">
+      <a class="brand" href="/" aria-label="Cardinal home">
+        <svg class="mark"><use href="#compass" /></svg><span>Cardinal</span>
+      </a>
+      <span class="kicker" id="header" tabindex="-1"></span>
+    </header>
+
+    <section class="block" aria-label="Video" id="video-block" hidden>
+      <div class="player" id="player">
+        <img class="poster" id="poster" alt="" />
+        <div class="shade"></div>
+        <button class="play" id="play" type="button" aria-label="Play the video">
+          <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="46" /><circle class="prog" id="prog" cx="50" cy="50" r="46" /></svg>
+          <svg class="tri" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 4.8v14.4L19.5 12z" /></svg>
+        </button>
+        <div class="status" id="vstatus" aria-live="polite"></div>
+      </div>
+      <div class="meta"><span id="vcaption"></span><span class="dur" id="dur"></span></div>
+    </section>
+
+    <section class="block" aria-labelledby="deck-label" id="deck-block" hidden>
+      <div class="head">
+        <h2 class="kicker" id="deck-label"></h2>
+        <span class="counter" id="counter" aria-live="polite"></span>
+      </div>
+      <div class="deck" id="deck" tabindex="0" role="region" aria-roledescription="carousel" aria-labelledby="deck-label">
+        <img class="slide" id="slideA" alt="" draggable="false" />
+        <img class="slide" id="slideB" alt="" draggable="false" />
+        <div class="wait" id="wait">Loading</div>
+        <button class="edge prev" id="prev" type="button" aria-label="Previous slide">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5" /></svg>
+        </button>
+        <button class="edge next" id="next" type="button" aria-label="Next slide">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5" /></svg>
+        </button>
+        <button class="full" id="full" type="button" aria-label="View the slides full screen" hidden>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1.5 5.5v-4h4M10.5 1.5h4v4M14.5 10.5v4h-4M5.5 14.5h-4v-4" /></svg>
+        </button>
+      </div>
+      <div class="thumbs" id="thumbs" role="tablist" aria-label="Slides"></div>
+    </section>
+
+    <section class="close">
+      <div class="rule" aria-hidden="true">
+        <span class="line"></span><svg class="mark"><use href="#compass" /></svg><span class="line"></span>
+      </div>
+      <p class="say" id="closing"></p>
+      <div class="sig"><span class="who" id="signature"></span><span class="what" id="role"></span></div>
+      <div class="links">
+        <a id="mail" href="#">Email</a>
+        <a id="site" href="https://cardinalcapital.xyz">cardinalcapital.xyz</a>
+      </div>
+    </section>
+
+    <footer class="foot" id="footer"></footer>
+  </div>
+
   <script>
-    (() => {
-      const HASH = '0acda9216a7d78b472f2fc98aff316e8db00668d53820e0b1c8ae8205794ea93';
-      const gate = document.getElementById('gate');
-      const vault = document.getElementById('vault');
-      const form = document.getElementById('form');
-      const pw = document.getElementById('pw');
-      const miss = document.getElementById('miss');
-      const MISSES = [
-        'Not the dog we had in mind.',
-        'Try again. He answers to one name.',
-        'Close. He wears it on his sweater.',
-      ];
-      let tries = 0;
+  (() => {
+    'use strict';
 
-      const norm = (s) => s.toLowerCase().replace(/[^a-z]/g, '');
+    const LOCK = 'vault/lock.json';
+    const STORE = 'cardinal-prospect';
+    const AAD = new TextEncoder().encode('cardinal-prospect/v1');
+    const $ = (id) => document.getElementById(id);
 
-      async function sha256(str) {
-        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-        return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+    // Must match norm() in _seal/seal.mjs: forgiving of case, spaces and punctuation.
+    const norm = (s) => String(s || '').normalize('NFKC').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const fromB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+    const gate = $('gate'), form = $('form'), pw = $('pw'), miss = $('miss');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let lock = null;
+
+    async function getLock() {
+      if (lock) return lock;
+      const r = await fetch(LOCK, { cache: 'no-store' });
+      if (!r.ok) throw new Error('lock');
+      lock = await r.json();
+      return lock;
+    }
+
+    async function deriveKey(secret) {
+      const l = await getLock();
+      const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits(
+        { name: 'PBKDF2', hash: 'SHA-256', salt: fromB64(l.kdf.salt), iterations: l.kdf.iterations }, base, 512);
+      return crypto.subtle.importKey('raw', bits.slice(0, 32), 'AES-GCM', false, ['decrypt']);
+    }
+
+    async function open(key, bytes) {
+      return crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes.slice(0, 12), additionalData: AAD }, key, bytes.slice(12));
+    }
+
+    // Fetch a sealed file, reporting progress when the server gives a length.
+    async function fetchSealed(name, onProgress) {
+      const r = await fetch('vault/' + name);
+      if (!r.ok) throw new Error('fetch ' + name);
+      const total = Number(r.headers.get('content-length')) || 0;
+      if (!onProgress || !r.body || !r.body.getReader) return new Uint8Array(await r.arrayBuffer());
+      const reader = r.body.getReader();
+      const parts = [];
+      let got = 0;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        parts.push(value);
+        got += value.length;
+        onProgress(total ? got / total : null);
       }
+      const out = new Uint8Array(got);
+      let at = 0;
+      for (const p of parts) { out.set(p, at); at += p.length; }
+      return out;
+    }
 
-      function unlock(remember) {
-        gate.style.display = 'none';
-        vault.classList.add('on');
-        if (remember) { try { sessionStorage.setItem('cc-prospect', '1'); } catch (e) {} }
-      }
+    async function openUrl(key, item, onProgress) {
+      const plain = await open(key, await fetchSealed(item.src, onProgress));
+      return URL.createObjectURL(new Blob([plain], { type: item.type }));
+    }
 
-      try { if (sessionStorage.getItem('cc-prospect') === '1') unlock(false); } catch (e) {}
+    function say(msg) {
+      miss.textContent = msg;
+      miss.classList.add('show');
+    }
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const attempt = norm(pw.value);
-        let ok = false;
+    function refuse(msg) {
+      say(msg);
+      form.classList.remove('shake');
+      void form.offsetWidth;
+      form.classList.add('shake');
+      pw.select();
+    }
+
+    async function unlock(secret, { quiet = false } = {}) {
+      if (!window.crypto || !crypto.subtle) { say('This page needs a secure connection.'); return false; }
+      const s = norm(secret);
+      if (!s) { if (!quiet) refuse('Enter the password.'); return false; }
+      form.classList.add('busy');
+      pw.disabled = true;
+      try {
+        const l = await getLock();
+        const key = await deriveKey(s);
+        let manifest;
         try {
-          ok = attempt.length > 0 && (await sha256(attempt)) === HASH;
-        } catch (err) {
-          ok = attempt === 'handsomedan'; // crypto.subtle needs https; localhost and the live site both qualify
+          const buf = await fetchSealed(l.manifest);
+          manifest = JSON.parse(new TextDecoder().decode(await open(key, buf)));
+        } catch (e) {
+          if (e && e.name === 'OperationError') {
+            if (!quiet) refuse('Incorrect password.');
+            return false;
+          }
+          throw e;
         }
-        if (ok) { unlock(true); return; }
-        miss.textContent = MISSES[Math.min(tries, MISSES.length - 1)];
-        miss.classList.add('show');
-        form.classList.remove('shake');
-        void form.offsetWidth;
-        form.classList.add('shake');
-        pw.select();
-        tries++;
+        try { sessionStorage.setItem(STORE, s); } catch (e) { /* private mode: they will be asked again */ }
+        show(manifest, key, quiet);
+        return true;
+      } catch (e) {
+        if (!quiet) say('Could not load the page. Check your connection and try again.');
+        return false;
+      } finally {
+        form.classList.remove('busy');
+        pw.disabled = false;
+      }
+    }
+
+    function text(id, value) {
+      const el = $(id);
+      if (value) el.textContent = value; else el.hidden = true;
+    }
+
+    function fmtTime(sec) {
+      if (!Number.isFinite(sec) || sec <= 0) return '';
+      const s = Math.round(sec);
+      return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    }
+
+    function show(m, key, quiet) {
+      const vault = $('vault');
+      const reveal = () => {
+        gate.hidden = true;
+        vault.hidden = false;
+        window.scrollTo(0, 0);
+        $('header').focus({ preventScroll: true });
+      };
+      if (quiet || reduceMotion) reveal();
+      else { gate.classList.add('leaving'); setTimeout(reveal, 420); }
+
+      text('header', m.header);
+      text('closing', m.closing);
+      text('signature', m.signature);
+      text('role', m.role);
+      text('footer', m.footer);
+      if (m.email) $('mail').href = 'mailto:' + m.email + '?subject=Cardinal';
+      else $('mail').hidden = true;
+      if (m.site) { $('site').href = m.site; $('site').textContent = m.site.replace(/^https?:\/\//, ''); }
+
+      if (m.video) setupVideo(m.video, key);
+      if (m.deck && m.deck.slides && m.deck.slides.length) setupDeck(m.deck, key);
+    }
+
+    /* ---------------------------------------------------------- video */
+
+    function embedUrl(kind, url) {
+      if (kind === 'youtube') {
+        const id = (url.match(/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([\w-]{11})/) || [])[1];
+        return id && `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1`;
+      }
+      const m = url.match(/vimeo\.com\/(?:video\/)?(\d+)(?:\/([0-9a-f]+))?/);
+      return m && `https://player.vimeo.com/video/${m[1]}?dnt=1${m[2] ? '&h=' + m[2] : ''}`;
+    }
+
+    function setupVideo(v, key) {
+      $('video-block').hidden = false;
+      text('vcaption', v.caption);
+      $('dur').textContent = fmtTime(v.seconds);
+      const player = $('player'), play = $('play'), prog = $('prog'), status = $('vstatus');
+
+      if (v.kind === 'youtube' || v.kind === 'vimeo') {
+        const src = embedUrl(v.kind, v.url);
+        if (!src) { $('video-block').hidden = true; return; }
+        const f = document.createElement('iframe');
+        f.src = src;
+        f.title = v.caption || 'Video';
+        f.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media';
+        f.allowFullscreen = true;
+        player.appendChild(f);
+        player.classList.add('playing');
+        return;
+      }
+
+      const C = 289.03;
+      let url = null;
+      let wanted = false;
+
+      if (v.poster) {
+        openUrl(key, v.poster).then((u) => {
+          const img = $('poster');
+          img.onload = () => img.classList.add('on');
+          img.src = u;
+        }).catch(() => {});
+      }
+
+      function start() {
+        const el = document.createElement('video');
+        el.src = url;
+        el.controls = true;
+        el.playsInline = true;
+        el.preload = 'auto';
+        if ($('poster').src) el.poster = $('poster').src;
+        el.addEventListener('loadedmetadata', () => { if (!$('dur').textContent) $('dur').textContent = fmtTime(el.duration); });
+        player.insertBefore(el, player.firstChild);
+        player.classList.add('playing');
+        el.play().catch(() => { /* autoplay refused after a long wait: the controls are there */ });
+        el.focus({ preventScroll: true });
+      }
+
+      play.addEventListener('click', () => {
+        if (url) start();
+        else { wanted = true; status.textContent = 'Loading'; }
       });
 
+      openUrl(key, v, (f) => {
+        if (f !== null) prog.style.strokeDashoffset = String(C * (1 - f));
+        if (wanted && f !== null) status.textContent = 'Loading ' + Math.round(f * 100) + '%';
+      }).then((u) => {
+        url = u;
+        prog.style.strokeDashoffset = '0';
+        play.classList.add('ready');
+        status.textContent = '';
+        if (wanted) start();
+      }).catch(() => {
+        status.textContent = 'The video did not load. Reload the page to try again.';
+      });
+    }
+
+    /* ---------------------------------------------------------- deck */
+
+    function setupDeck(deck, key) {
+      $('deck-block').hidden = false;
+      $('deck-label').textContent = deck.label || 'From the deck';
+
+      const slides = deck.slides;
+      const urls = new Array(slides.length).fill(null);
+      const waiting = new Map();
+      const layers = [$('slideA'), $('slideB')];
+      let front = 0;
+      let i = 0;
+
+      const box = $('deck'), prev = $('prev'), next = $('next'), counter = $('counter'), thumbs = $('thumbs'), full = $('full');
+      const pad = (n) => String(n).padStart(2, '0');
+
+      const tabs = slides.map((s, n) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'thumb';
+        b.setAttribute('role', 'tab');
+        b.setAttribute('aria-label', `Slide ${n + 1}: ${s.title || ''}`);
+        b.addEventListener('click', () => go(n));
+        thumbs.appendChild(b);
+        return b;
+      });
+
+      function paint() {
+        const url = urls[i];
+        const s = slides[i];
+        counter.textContent = `${pad(i + 1)} / ${pad(slides.length)}`;
+        prev.disabled = i === 0;
+        next.disabled = i === slides.length - 1;
+        tabs.forEach((t, n) => t.setAttribute('aria-selected', String(n === i)));
+        // Scroll the strip sideways only; scrollIntoView would also move the page.
+        const t = tabs[i];
+        const left = t.offsetLeft - (thumbs.clientWidth - t.clientWidth) / 2;
+        thumbs.scrollTo({ left: Math.max(0, left), behavior: reduceMotion ? 'auto' : 'smooth' });
+        if (!url) { $('wait').hidden = false; return; }
+        $('wait').hidden = true;
+        const back = layers[1 - front];
+        back.alt = s.title ? `Slide ${i + 1}: ${s.title}` : `Slide ${i + 1}`;
+        back.onload = () => {
+          back.classList.add('front');
+          layers[front].classList.remove('front');
+          front = 1 - front;
+        };
+        back.src = url;
+      }
+
+      function go(n) {
+        const to = Math.max(0, Math.min(slides.length - 1, n));
+        if (to === i && layers[front].src) return;
+        i = to;
+        paint();
+      }
+
+      prev.addEventListener('click', (e) => { e.stopPropagation(); go(i - 1); });
+      next.addEventListener('click', (e) => { e.stopPropagation(); go(i + 1); });
+
+      // Click the left third to go back, anywhere else to go forward; swipe on touch.
+      let x0 = null;
+      box.addEventListener('pointerdown', (e) => { x0 = e.clientX; });
+      box.addEventListener('pointerup', (e) => {
+        if (x0 === null || e.target.closest('button')) { x0 = null; return; }
+        const dx = e.clientX - x0;
+        x0 = null;
+        if (dx > 40) go(i - 1);
+        else if (dx < -40) go(i + 1);
+        else if (Math.abs(dx) < 8) {
+          const r = box.getBoundingClientRect();
+          go(e.clientX - r.left < r.width / 3 ? i - 1 : i + 1);
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if ($('vault').hidden || e.metaKey || e.ctrlKey || e.altKey) return;
+        const tag = (document.activeElement && document.activeElement.tagName) || '';
+        if (tag === 'VIDEO' || tag === 'INPUT' || tag === 'IFRAME') return;
+        if (e.key === 'ArrowRight') { go(i + 1); e.preventDefault(); }
+        else if (e.key === 'ArrowLeft') { go(i - 1); e.preventDefault(); }
+      });
+
+      const canFull = box.requestFullscreen || box.webkitRequestFullscreen;
+      if (canFull) {
+        full.hidden = false;
+        full.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+          if (fsEl) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+          else {
+            const p = (box.requestFullscreen || box.webkitRequestFullscreen).call(box);
+            if (p && p.catch) p.catch(() => {});
+          }
+        });
+      }
+
+      // Load in order, so the first slide is ready first.
+      (async () => {
+        for (let n = 0; n < slides.length; n++) {
+          try {
+            urls[n] = await openUrl(key, slides[n]);
+            const img = document.createElement('img');
+            img.alt = '';
+            img.src = urls[n];
+            tabs[n].appendChild(img);
+            if (n === i) paint();
+          } catch (e) { /* a slide that fails stays a blank tile */ }
+        }
+      })();
+
+      paint();
+    }
+
+    /* ---------------------------------------------------------- entry */
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      miss.classList.remove('show');
+      unlock(pw.value);
+    });
+
+    (async () => {
+      // A link can carry the password after #. That part never reaches the server.
+      let fromLink = '';
+      try { fromLink = location.hash.length > 1 ? decodeURIComponent(location.hash.slice(1)) : ''; } catch (e) { fromLink = location.hash.slice(1); }
+      let remembered = '';
+      try { remembered = sessionStorage.getItem(STORE) || ''; } catch (e) {}
+      if (fromLink) history.replaceState(null, '', location.pathname + location.search);
+      const tryFirst = fromLink || remembered;
+      if (tryFirst && (await unlock(tryFirst, { quiet: true }))) return;
+      try { sessionStorage.removeItem(STORE); } catch (e) {}
       pw.focus({ preventScroll: true });
     })();
+  })();
   </script>
 </body>
 </html>

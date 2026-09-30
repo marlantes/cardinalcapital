@@ -1,0 +1,6 @@
+# /prospect: the plaintext video, slides, config and password stay on this machine.
+# Only prospect/vault/ (ciphertext) is published. See prospect/_seal/seal.mjs.
+prospect/_private/
+# Earlier local staging folder for the page's media, superseded by _private/
+prospect/media/
+.DS_Store

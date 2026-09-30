@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "kdf": {
+    "name": "PBKDF2",
+    "hash": "SHA-256",
+    "iterations": 600000,
+    "salt": "MDzZJ+wczrzHR69yoXtg9w=="
+  },
+  "manifest": "mdd551305fd1cbec776e9.bin"
+}
