@@ -4,7 +4,7 @@
     "name": "PBKDF2",
     "hash": "SHA-256",
     "iterations": 600000,
-    "salt": "MDzZJ+wczrzHR69yoXtg9w=="
+    "salt": "si6x1elSPobA1oXg5YXStA=="
   },
-  "manifest": "mdd551305fd1cbec776e9.bin"
+  "manifest": "m1f325796f7f69e502dfa.bin"
 }

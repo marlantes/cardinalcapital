@@ -97,7 +97,8 @@ function probeDuration(file) {
 
 function mimeFor(file) {
   const ext = path.extname(file).toLowerCase();
-  return { '.webp': 'image/webp', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.mp4': 'video/mp4' }[ext]
+  return { '.webp': 'image/webp', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.mp4': 'video/mp4',
+    '.svg': 'image/svg+xml' }[ext]
     || fail(`no content type for ${file}`);
 }
 
@@ -109,7 +110,10 @@ async function main() {
   if (!password && fs.existsSync(pwFile)) password = fs.readFileSync(pwFile, 'utf8').trim();
   if (!password) fail('no password: set PROSPECT_PASSWORD or write prospect/_private/password.txt');
   const key = norm(password);
-  if (key.length < 12) fail('password is too short once spaces and punctuation are dropped (12+ letters or digits)');
+  if (key.length < 8) fail('password is too short once spaces and punctuation are dropped (8+ letters or digits)');
+  // A short or guessable word is a choice, not an error: it keeps out search engines and
+  // passers-by, and anyone who guesses it can read the page.
+  if (key.length < 12) console.warn(`seal: the password is ${key.length} letters; anyone who guesses it can open the page`);
 
   const config = JSON.parse(fs.readFileSync(path.join(PRIVATE, 'config.json'), 'utf8'));
   fs.mkdirSync(VAULT, { recursive: true });
@@ -164,7 +168,18 @@ async function main() {
     footer: config.footer,
     video: null,
     deck: { label: config.deckLabel || 'From the deck', slides: [] },
+    welcome: null,
   };
+
+  // An animation played once when the password opens the page. It is sealed like the
+  // rest, so the public page holds only a generic stage for it.
+  if (config.welcome && config.welcome.file) {
+    manifest.welcome = { ...(await put(config.welcome.file)), ms: config.welcome.ms || 3600 };
+  }
+  // An illustration above the closing line, with an optional caption.
+  if (config.sendoff && config.sendoff.file) {
+    manifest.sendoff = { ...(await put(config.sendoff.file)), label: config.sendoff.label || null };
+  }
 
   const v = config.video || {};
   if (v.youtube || v.vimeo) {
@@ -201,7 +216,7 @@ async function main() {
   }
 
   const total = [...keep].reduce((n, f) => n + fs.statSync(path.join(VAULT, f)).size, 0);
-  console.log(`sealed ${manifest.deck.slides.length} slides${manifest.video ? ` and a ${manifest.video.kind} video` : ''}`);
+  console.log(`sealed ${manifest.deck.slides.length} slides${manifest.video ? ` and a ${manifest.video.kind} video` : ''}${manifest.welcome ? ', with a welcome' : ''}`);
   console.log(`vault: ${keep.size} files, ${(total / 1048576).toFixed(1)} MB; ${written} newly encrypted, ${removed} removed; salt ${reused ? 'kept' : 'new'}`);
   // The part after # never leaves the browser: it is not sent to GitHub or logged.
   console.log(`link:  ${config.site || 'https://cardinalcapital.xyz'}/prospect/#${encodeURIComponent(password.trim())}`);

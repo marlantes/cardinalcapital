@@ -344,6 +344,10 @@
     margin: 0 auto;
     text-wrap: balance;
   }
+  /* an illustration that can stand in for the compass above the closing line; sealed like the rest */
+  .sendoff { width: min(15.5rem, 60vw); margin: 0 auto; }
+  .sendoff > svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .sendoff-label { margin: 1.2rem 0 1.5rem; }
   .sig { margin-top: 1.6rem; display: flex; flex-direction: column; gap: 0.25rem; }
   .sig .who { font-weight: 500; letter-spacing: 0.02em; }
   .sig .what { font-size: 0.85rem; color: var(--slate); }
@@ -359,6 +363,22 @@
     .meta { flex-direction: column; gap: 0.2rem; }
     .play { width: 4.6rem; height: 4.6rem; }
   }
+
+  /* ------------------------------------------------------------ welcome
+     A short animation plays once when the password opens the page. Like
+     everything else behind the password it is sealed in vault/, so all
+     this page knows about it is where to put it. */
+  .stage {
+    position: fixed; inset: 0; z-index: 5;
+    display: grid; place-items: center;
+    padding: 1.5rem;
+    cursor: pointer;
+    animation: stage-in 0.3s ease both;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .stage.done { opacity: 0; transform: scale(1.04); pointer-events: none; }
+  .stage > svg { width: min(84vmin, 34rem); height: auto; overflow: visible; }
+  @keyframes stage-in { from { opacity: 0; } to { opacity: 1; } }
 
   @media (prefers-reduced-motion: reduce) {
     .vault, .shake { animation: none; }
@@ -394,7 +414,7 @@
     <div class="rule" aria-hidden="true">
       <span class="line"></span><svg class="mark"><use href="#compass" /></svg><span class="line"></span>
     </div>
-    <div class="kicker">For Yale Investments</div>
+    <div class="kicker">Prospect Fellowship</div>
     <form class="pw" id="form" autocomplete="off" novalidate>
       <label class="sr" for="pw">Password</label>
       <input id="pw" type="password" placeholder="Password" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" />
@@ -451,9 +471,11 @@
     </section>
 
     <section class="close">
-      <div class="rule" aria-hidden="true">
+      <div class="rule" id="close-rule" aria-hidden="true">
         <span class="line"></span><svg class="mark"><use href="#compass" /></svg><span class="line"></span>
       </div>
+      <div class="sendoff" id="sendoff" hidden></div>
+      <p class="kicker sendoff-label" id="sendoff-label" hidden></p>
       <p class="say" id="closing"></p>
       <div class="sig"><span class="who" id="signature"></span><span class="what" id="role"></span></div>
       <div class="links">
@@ -543,7 +565,8 @@
       pw.select();
     }
 
-    async function unlock(secret, { quiet = false } = {}) {
+    // quiet: no error messages (a link or a reload tries first). greet: play the welcome.
+    async function unlock(secret, { quiet = false, greet = false } = {}) {
       if (!window.crypto || !crypto.subtle) { say('This page needs a secure connection.'); return false; }
       const s = norm(secret);
       if (!s) { if (!quiet) refuse('Enter the password.'); return false; }
@@ -564,7 +587,7 @@
           throw e;
         }
         try { sessionStorage.setItem(STORE, s); } catch (e) { /* private mode: they will be asked again */ }
-        show(manifest, key, quiet);
+        show(manifest, key, { quiet, greet });
         return true;
       } catch (e) {
         if (!quiet) say('Could not load the page. Check your connection and try again.');
@@ -586,7 +609,32 @@
       return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
     }
 
-    function show(m, key, quiet) {
+    // Decrypt the welcome, play it on a stage over the page, and resolve when it ends
+    // or the visitor clicks or presses a key. If it cannot load, the page just opens.
+    async function welcome(item, key) {
+      let markup;
+      try { markup = new TextDecoder().decode(await open(key, await fetchSealed(item.src))); }
+      catch (e) { return; }
+      const stage = document.createElement('div');
+      stage.className = 'stage';
+      stage.innerHTML = markup;           // authenticated by AES-GCM, so it is our own file
+      document.body.appendChild(stage);
+      await new Promise((done) => {
+        const end = () => {
+          clearTimeout(timer);
+          stage.removeEventListener('click', end);
+          document.removeEventListener('keydown', end);
+          done();
+        };
+        const timer = setTimeout(end, item.ms || 3600);
+        stage.addEventListener('click', end);
+        document.addEventListener('keydown', end);
+      });
+      stage.classList.add('done');
+      setTimeout(() => stage.remove(), 700);
+    }
+
+    function show(m, key, { quiet = false, greet = false } = {}) {
       const vault = $('vault');
       const reveal = () => {
         gate.hidden = true;
@@ -594,7 +642,8 @@
         window.scrollTo(0, 0);
         $('header').focus({ preventScroll: true });
       };
-      if (quiet || reduceMotion) reveal();
+      if (greet && m.welcome && !reduceMotion) { gate.classList.add('leaving'); welcome(m.welcome, key).then(reveal); }
+      else if (quiet || reduceMotion) reveal();
       else { gate.classList.add('leaving'); setTimeout(reveal, 420); }
 
       text('header', m.header);
@@ -608,6 +657,18 @@
 
       if (m.video) setupVideo(m.video, key);
       if (m.deck && m.deck.slides && m.deck.slides.length) setupDeck(m.deck, key);
+      if (m.sendoff) setupSendoff(m.sendoff, key);
+    }
+
+    // The closing illustration replaces the compass rule once it decrypts; if it cannot, the rule stays.
+    async function setupSendoff(item, key) {
+      try {
+        const markup = new TextDecoder().decode(await open(key, await fetchSealed(item.src)));
+        $('sendoff').innerHTML = markup;  // authenticated by AES-GCM, so it is our own file
+        $('sendoff').hidden = false;
+        $('close-rule').hidden = true;
+        if (item.label) { $('sendoff-label').textContent = item.label; $('sendoff-label').hidden = false; }
+      } catch (e) { /* keep the compass */ }
     }
 
     /* ---------------------------------------------------------- video */
@@ -804,7 +865,7 @@
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       miss.classList.remove('show');
-      unlock(pw.value);
+      unlock(pw.value, { greet: true });
     });
 
     (async () => {
@@ -815,7 +876,8 @@
       try { remembered = sessionStorage.getItem(STORE) || ''; } catch (e) {}
       if (fromLink) history.replaceState(null, '', location.pathname + location.search);
       const tryFirst = fromLink || remembered;
-      if (tryFirst && (await unlock(tryFirst, { quiet: true }))) return;
+      // A link opens with the welcome; a reload in the same visit skips it.
+      if (tryFirst && (await unlock(tryFirst, { quiet: true, greet: Boolean(fromLink) }))) return;
       try { sessionStorage.removeItem(STORE); } catch (e) {}
       pw.focus({ preventScroll: true });
     })();
